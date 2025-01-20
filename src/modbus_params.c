@@ -43,11 +43,25 @@ typedef struct
     QueueHandle_t uints[MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT];
 } holding_reg_params_mutexes_t;
 
+#pragma pack(push, 1)
+typedef struct
+{
+    bool state[MODBUS_PARAMS_COIL_COUNT];
+} coil_params_t;
+#pragma pack(pop)
+typedef struct
+{
+    QueueHandle_t state[MODBUS_PARAMS_COIL_COUNT];
+} coil_params_mutexes_t;
+
 input_reg_params_t input_reg_params = {0};
 input_reg_params_mutexes_t input_reg_params_mutexes = {0};
 
 holding_reg_params_t holding_reg_params = {0};
 holding_reg_params_mutexes_t holding_reg_params_mutexes = {0};
+
+coil_params_t coil_params = {0};
+coil_params_mutexes_t coil_params_mutexes = {0};
 
 // TODO: Add logic to have min/max values for parameters
 
@@ -68,6 +82,14 @@ static esp_err_t setup_reg_data(void)
         holding_reg_params.uints[uint_ind] = 0x0;
         holding_reg_params_mutexes.uints[uint_ind] = xSemaphoreCreateMutex();
         if (holding_reg_params_mutexes.uints[uint_ind] == NULL)
+            return ESP_FAIL;
+    }
+    // Define initial state of parameters
+    for (ModbusParams_Coil_t coil_ind = (ModbusParams_Coil_t)0; coil_ind < MODBUS_PARAMS_COIL_COUNT; coil_ind++)
+    {
+        coil_params.state[coil_ind] = 0x0;
+        coil_params_mutexes.state[coil_ind] = xSemaphoreCreateMutex();
+        if (coil_params_mutexes.state[coil_ind] == NULL)
             return ESP_FAIL;
     }
     return ESP_OK;
@@ -121,13 +143,28 @@ esp_err_t get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t index, 
     return ESP_OK;
 }
 
+esp_err_t get_coil_reg_area(ModbusParams_Coil_t index, mb_register_area_descriptor_t *const reg_area)
+{
+    if (index >= MODBUS_PARAMS_COIL_COUNT)
+        return ESP_FAIL;
+    if (reg_area == NULL)
+        return ESP_FAIL;
+
+    reg_area->type = MB_PARAM_COIL;
+    reg_area->start_offset = (index * (sizeof(bool) << 2));
+    reg_area->address = (void *)&coil_params.state[index];
+    reg_area->size = sizeof(bool) << 2; // TODO: Optimize this to not use a full byte per coil, do a bitfield with ports?
+    // reg_area->access = MB_ACCESS_RW;
+
+    return ESP_OK;
+}
+
 esp_err_t set_input_register_float(ModbusParams_InReg_Float_t index, float value)
 {
     if (index >= MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT)
         return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
-    // TODO: Is mutex lock really needed if mbc_slave_lock works?
     if (xSemaphoreTake(input_reg_params_mutexes.floats[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
         return ESP_FAIL;
     ret = mbc_slave_lock(slave_handler_ctx);
@@ -150,7 +187,6 @@ esp_err_t set_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t 
         return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
-    // TODO: Is mutex lock really needed if mbc_slave_lock works?
     if (xSemaphoreTake(holding_reg_params_mutexes.uints[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
         return ESP_FAIL;
     ret = mbc_slave_lock(slave_handler_ctx);
@@ -175,7 +211,6 @@ esp_err_t get_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t 
         return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
-    // TODO: Is mutex lock really needed if mbc_slave_lock works?
     if (xSemaphoreTake(holding_reg_params_mutexes.uints[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
         return ESP_FAIL;
     ret = mbc_slave_lock(slave_handler_ctx);
@@ -187,6 +222,52 @@ esp_err_t get_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t 
     *value = holding_reg_params.uints[index];
     ret = mbc_slave_unlock(slave_handler_ctx);
     xSemaphoreGive(holding_reg_params_mutexes.uints[index]);
+    if (ret != ESP_OK)
+        return ret;
+    return ESP_OK;
+}
+
+esp_err_t set_coil_state(ModbusParams_Coil_t index, bool state)
+{
+    if (index >= MODBUS_PARAMS_COIL_COUNT)
+        return ESP_FAIL;
+
+    esp_err_t ret = ESP_OK;
+    if (xSemaphoreTake(coil_params_mutexes.state[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
+        return ESP_FAIL;
+    ret = mbc_slave_lock(slave_handler_ctx);
+    if (ret != ESP_OK)
+    {
+        xSemaphoreGive(coil_params_mutexes.state[index]);
+        return ret;
+    }
+    coil_params.state[index] = state;
+    ret = mbc_slave_unlock(slave_handler_ctx);
+    xSemaphoreGive(coil_params_mutexes.state[index]);
+    if (ret != ESP_OK)
+        return ret;
+    return ESP_OK;
+}
+
+esp_err_t get_coil_state(ModbusParams_Coil_t index, bool *const state)
+{
+    if (index >= MODBUS_PARAMS_COIL_COUNT)
+        return ESP_FAIL;
+    if (state == NULL)
+        return ESP_FAIL;
+
+    esp_err_t ret = ESP_OK;
+    if (xSemaphoreTake(coil_params_mutexes.state[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
+        return ESP_FAIL;
+    ret = mbc_slave_lock(slave_handler_ctx);
+    if (ret != ESP_OK)
+    {
+        xSemaphoreGive(coil_params_mutexes.state[index]);
+        return ret;
+    }
+    *state = coil_params.state[index];
+    ret = mbc_slave_unlock(slave_handler_ctx);
+    xSemaphoreGive(coil_params_mutexes.state[index]);
     if (ret != ESP_OK)
         return ret;
     return ESP_OK;

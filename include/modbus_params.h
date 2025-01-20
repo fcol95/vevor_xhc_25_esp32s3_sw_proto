@@ -35,14 +35,26 @@ typedef enum
     MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT,
 } ModbusParams_HoldReg_UInt_t;
 
+typedef enum
+{
+    ENABLE_PELTIER_OVERRIDE = 0,
+    OVERRIDE_PELTIER_HIGH_SIDE_RELAY_STATE,
+    OVERRIDE_PELTIER_LOW_SIDE_RELAY_STATE,
+    MODBUS_PARAMS_COIL_COUNT,
+} ModbusParams_Coil_t;
+
 esp_err_t init_modbus_params(void *slave_handler);
 
 esp_err_t get_input_register_float_reg_area(ModbusParams_InReg_Float_t index, mb_register_area_descriptor_t *const reg_area);
 esp_err_t get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t index, mb_register_area_descriptor_t *const reg_area);
+esp_err_t get_coil_reg_area(ModbusParams_Coil_t index, mb_register_area_descriptor_t *const reg_area);
 
 esp_err_t set_input_register_float(ModbusParams_InReg_Float_t index, float value);
 
 esp_err_t set_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t value);
 esp_err_t get_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t *const value);
+
+esp_err_t set_coil_state(ModbusParams_Coil_t index, bool state);
+esp_err_t get_coil_state(ModbusParams_Coil_t index, bool *const state);
 
 #endif // !defined(_DEVICE_PARAMS)

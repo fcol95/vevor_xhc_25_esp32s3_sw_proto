@@ -12,6 +12,7 @@
 #include "esp_log.h"
 
 #include "temp_sense.h"
+#include "peltier_driver.h"
 #include "modbus_server.h"
 
 static const char *LOG_TAG = "main";
@@ -78,6 +79,8 @@ void app_main()
     // Drivers Init
     esp_err_t temp_sense_ret = temp_sense_init();
 
+    esp_err_t peltier_driver_ret = peltier_driver_init();
+
     esp_err_t modbus_server_ret = modbus_server_init();
 
     // Tasks Init
@@ -86,8 +89,24 @@ void app_main()
     {
         xTaskCreate(&temp_sense_task, "temp_sense_task", configMINIMAL_STACK_SIZE * 2, NULL, 5, NULL);
     }
+    else
+    {
+        ESP_LOGE(LOG_TAG, "Failed to initialize temperature sensor!");
+    }
     if (modbus_server_ret == ESP_OK)
     {
         xTaskCreate(&modbus_server_task, "modbus_server_task", configMINIMAL_STACK_SIZE * 2, NULL, 5, NULL);
+    }
+    else
+    {
+        ESP_LOGE(LOG_TAG, "Failed to initialize Modbus server!");
+    }
+    if (peltier_driver_ret == ESP_OK)
+    {
+        xTaskCreate(&peltier_driver_task, "peltier_driver_task", configMINIMAL_STACK_SIZE * 2, NULL, 5, NULL);
+    }
+    else
+    {
+        ESP_LOGE(LOG_TAG, "Failed to initialize Peltier control!");
     }
 }

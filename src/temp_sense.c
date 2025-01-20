@@ -65,7 +65,7 @@ void temp_sense_task(void *pvParameter)
         esp_err_t ret = ntc_dev_get_temperature(ntc, &ntc_temperature_degc);
         if (ret == ESP_OK)
         {
-            ESP_LOGI(LOG_TAG, "NTC temperature = %.2f°C.", ntc_temperature_degc);
+            ESP_LOGV(LOG_TAG, "NTC temperature = %.2f°C.", ntc_temperature_degc);
         }
         else
         {
