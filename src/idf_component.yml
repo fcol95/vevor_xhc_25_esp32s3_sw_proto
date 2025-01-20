@@ -1,6 +1,5 @@
 dependencies:
   idf: ">=5.0"
-  espressif/cmake_utilities: "0.*"
   espressif/ntc_driver: ">=1.1.0"
   espressif/mdns: ">=1.4.3"
   espressif/esp-modbus: ">=2.0.1"

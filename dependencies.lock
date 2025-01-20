@@ -34,6 +34,6 @@ dependencies:
       path: C:\Users\felix\.platformio\packages\framework-espidf\examples\common_components\protocol_examples_common
       type: local
     version: '*'
-manifest_hash: 3c00c600d464def62bd4b6c42e0106ce2600c374d5e1e6ae9dea2f83a83340ac
+manifest_hash: d08103dc606382a85745feb46ad279ee89bfd519790e39fc9a050d9fea2e833d
 target: esp32s3
 version: 1.0.0
