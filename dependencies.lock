@@ -1,4 +1,10 @@
 dependencies:
+  espressif/cmake_utilities:
+    component_hash: 351350613ceafba240b761b4ea991e0f231ac7a9f59a9ee901f751bddc0bb18f
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 0.5.3
   espressif/esp-modbus:
     component_hash: 1c3be72a0b5384929901a737860463c04e3393913d0e1bf2588ca980cbe675e3
     source:
@@ -11,6 +17,12 @@ dependencies:
       service_url: https://api.components.espressif.com/
       type: service
     version: 1.4.3
+  espressif/ntc_driver:
+    component_hash: 9f263658e8024a2fd1cd784efc345da12522fd72108143bf2b27fc36df0198f1
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.1.0
   idf:
     component_hash: null
     source:
@@ -22,6 +34,6 @@ dependencies:
       path: C:\Users\felix\.platformio\packages\framework-espidf\examples\common_components\protocol_examples_common
       type: local
     version: '*'
-manifest_hash: e50fa8bdd9a5cd8be0245a795618d8fe42dd1af3bd380d77363ec8a65835074e
+manifest_hash: 3c00c600d464def62bd4b6c42e0106ce2600c374d5e1e6ae9dea2f83a83340ac
 target: esp32s3
 version: 1.0.0

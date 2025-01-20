@@ -1,12 +1,15 @@
 #include "temp_sense.h"
 
-#include "esp_log.h"
+#include <math.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
+#include "esp_log.h"
+
 #include "ntc_driver.h"
 
-#include <math.h>
+#include "modbus_params.h"
 
 #define TEMP_SENSE_DEFAULT_PERIOD_MS 1000U
 
@@ -58,11 +61,11 @@ void temp_sense_task(void *pvParameter)
     while (1)
     {
         // Get NTC sensor data
-        float temp = NAN;
-        esp_err_t ret = ntc_dev_get_temperature(ntc, &temp);
+        float ntc_temperature_degc = NAN;
+        esp_err_t ret = ntc_dev_get_temperature(ntc, &ntc_temperature_degc);
         if (ret == ESP_OK)
         {
-            ESP_LOGI(LOG_TAG, "NTC temperature = %.2f°C.", temp);
+            ESP_LOGI(LOG_TAG, "NTC temperature = %.2f°C.", ntc_temperature_degc);
         }
         else
         {
@@ -70,7 +73,7 @@ void temp_sense_task(void *pvParameter)
         }
 
         // Refresh modbus registers
-        ret_esp = set_input_register_float(ACTUAL_TEMP_DEGC, data.temperature);
+        ret_esp = set_input_register_float(ACTUAL_TEMP_DEGC, ntc_temperature_degc);
         if (ret_esp != ESP_OK)
         {
             ESP_LOGE(LOG_TAG, "Failed to updated modbus parameter TEMP_TEMP_DEGC!");
