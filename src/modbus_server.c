@@ -212,10 +212,10 @@ static esp_err_t slave_init()
     mbc_slave_init_iface(slave_handler);
 
     // Init Modbus parameters and register area descriptors
-    ret = init_modbus_params(slave_handler);
+    ret = modbus_params_init(slave_handler);
     MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                        LOG_TAG,
-                       "init_modbus_params failed!");
+                       "modbus_params_init failed!");
     // The code below initializes Modbus register area descriptors
     // for Modbus Holding Registers, Input Registers, Coils and Discrete Inputs
     // Initialization should be done for each supported Modbus register area according to register map.
@@ -226,10 +226,10 @@ static esp_err_t slave_init()
     for (ModbusParams_InReg_Float_t float_ind = (ModbusParams_InReg_Float_t)0; float_ind < MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT; float_ind++)
     {
         mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
-        ret = get_input_register_float_reg_area(float_ind, &reg_area);
+        ret = modbus_params_get_input_register_float_reg_area(float_ind, &reg_area);
         MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "get_input_register_float_reg_area fail for float index %d, returns(0x%x).",
+                           "modbus_params_get_input_register_float_reg_area fail for float index %d, returns(0x%x).",
                            float_ind, (int)ret);
 
         ret = mbc_slave_set_descriptor(slave_handler, reg_area);
@@ -242,10 +242,10 @@ static esp_err_t slave_init()
     for (ModbusParams_HoldReg_UInt_t uint_ind = (ModbusParams_HoldReg_UInt_t)0; uint_ind < MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT; uint_ind++)
     {
         mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
-        ret = get_holding_register_uint_reg_area(uint_ind, &reg_area);
+        ret = modbus_params_get_holding_register_uint_reg_area(uint_ind, &reg_area);
         MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "get_holding_register_uint_reg_area fail for int index %d, returns(0x%x).",
+                           "modbus_params_get_holding_register_uint_reg_area fail for int index %d, returns(0x%x).",
                            uint_ind, (int)ret);
 
         ret = mbc_slave_set_descriptor(slave_handler, reg_area);
@@ -259,10 +259,10 @@ static esp_err_t slave_init()
     for (uint8_t coil_ind = 0; coil_ind < MODBUS_PARAMS_COIL_PORTS_COUNT; coil_ind++)
     {
         mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
-        ret = get_coil_port_reg_area(coil_ind, &reg_area);
+        ret = modbus_params_get_coil_port_reg_area(coil_ind, &reg_area);
         MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "get_coil_port_reg_area fail for int index %d, returns(0x%x).",
+                           "modbus_params_get_coil_port_reg_area fail for int index %d, returns(0x%x).",
                            coil_ind, (int)ret);
 
         ret = mbc_slave_set_descriptor(slave_handler, reg_area);

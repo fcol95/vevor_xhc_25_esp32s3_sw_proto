@@ -52,7 +52,7 @@ void temp_sense_task(void *pvParameter)
     uint16_t task_period_ms = TEMP_SENSE_DEFAULT_PERIOD_MS;
     esp_err_t ret_esp = ESP_OK;
 
-    ret_esp = set_holding_register_uint(TEMP_SENSE_PERIOD_MS, task_period_ms);
+    ret_esp = modbus_params_set_holding_register_uint(TEMP_SENSE_PERIOD_MS, task_period_ms);
     if (ret_esp != ESP_OK)
     {
         ESP_LOGE(LOG_TAG, "Failed to set modbus parameter TEMP_SENSE_PERIOD_MS!");
@@ -73,7 +73,7 @@ void temp_sense_task(void *pvParameter)
         }
 
         // Refresh modbus registers
-        ret_esp = set_input_register_float(ACTUAL_TEMP_DEGC, ntc_temperature_degc);
+        ret_esp = modbus_params_set_input_register_float(ACTUAL_TEMP_DEGC, ntc_temperature_degc);
         if (ret_esp != ESP_OK)
         {
             ESP_LOGE(LOG_TAG, "Failed to updated modbus parameter TEMP_TEMP_DEGC!");
@@ -81,7 +81,7 @@ void temp_sense_task(void *pvParameter)
 
         // Update task period if requested
         uint16_t new_task_period_ms;
-        ret_esp = get_holding_register_uint(TEMP_SENSE_PERIOD_MS, &new_task_period_ms);
+        ret_esp = modbus_params_get_holding_register_uint(TEMP_SENSE_PERIOD_MS, &new_task_period_ms);
         if (ret_esp != ESP_OK)
         {
             ESP_LOGE(LOG_TAG, "Failed to get modbus parameter TEMP_SENSE_PERIOD_MS!");

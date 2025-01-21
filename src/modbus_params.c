@@ -113,7 +113,7 @@ static esp_err_t setup_reg_data(void)
 
 void *slave_handler_ctx = NULL;
 
-esp_err_t init_modbus_params(void *slave_handler)
+esp_err_t modbus_params_init(void *slave_handler)
 {
     if (slave_handler == NULL)
         return ESP_FAIL;
@@ -127,7 +127,7 @@ esp_err_t init_modbus_params(void *slave_handler)
     return ret;
 }
 
-esp_err_t get_input_register_float_reg_area(ModbusParams_InReg_Float_t index, mb_register_area_descriptor_t *const reg_area)
+esp_err_t modbus_params_get_input_register_float_reg_area(ModbusParams_InReg_Float_t index, mb_register_area_descriptor_t *const reg_area)
 {
     if (index >= MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT)
         return ESP_FAIL;
@@ -143,7 +143,7 @@ esp_err_t get_input_register_float_reg_area(ModbusParams_InReg_Float_t index, mb
     return ESP_OK;
 }
 
-esp_err_t get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t index, mb_register_area_descriptor_t *const reg_area)
+esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t index, mb_register_area_descriptor_t *const reg_area)
 {
     if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT)
         return ESP_FAIL;
@@ -159,7 +159,7 @@ esp_err_t get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t index, 
     return ESP_OK;
 }
 
-esp_err_t get_coil_port_reg_area(uint8_t index, mb_register_area_descriptor_t *const reg_area)
+esp_err_t modbus_params_get_coil_port_reg_area(uint8_t index, mb_register_area_descriptor_t *const reg_area)
 {
     if (index >= MODBUS_PARAMS_COIL_PORTS_COUNT)
         return ESP_FAIL;
@@ -175,7 +175,7 @@ esp_err_t get_coil_port_reg_area(uint8_t index, mb_register_area_descriptor_t *c
     return ESP_OK;
 }
 
-esp_err_t set_input_register_float(ModbusParams_InReg_Float_t index, float value)
+esp_err_t modbus_params_set_input_register_float(ModbusParams_InReg_Float_t index, float value)
 {
     if (index >= MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT)
         return ESP_FAIL;
@@ -197,7 +197,7 @@ esp_err_t set_input_register_float(ModbusParams_InReg_Float_t index, float value
     return ESP_OK;
 }
 
-esp_err_t set_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t value)
+esp_err_t modbus_params_set_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t value)
 {
     if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT)
         return ESP_FAIL;
@@ -219,7 +219,7 @@ esp_err_t set_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t 
     return ESP_OK;
 }
 
-esp_err_t get_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t *const value)
+esp_err_t modbus_params_get_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t *const value)
 {
     if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT)
         return ESP_FAIL;
@@ -243,7 +243,7 @@ esp_err_t get_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t 
     return ESP_OK;
 }
 
-esp_err_t set_coil_state(ModbusParams_Coil_t index, bool state)
+esp_err_t modbus_params_set_coil_state(ModbusParams_Coil_t index, bool state)
 {
     if (index >= MODBUS_PARAMS_COIL_COUNT)
         return ESP_FAIL;
@@ -268,7 +268,7 @@ esp_err_t set_coil_state(ModbusParams_Coil_t index, bool state)
     return ESP_OK;
 }
 
-esp_err_t get_coil_state(ModbusParams_Coil_t index, bool *const state)
+esp_err_t modbus_params_get_coil_state(ModbusParams_Coil_t index, bool *const state)
 {
     if (index >= MODBUS_PARAMS_COIL_COUNT)
         return ESP_FAIL;

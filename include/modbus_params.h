@@ -10,8 +10,8 @@
  *   can be addressed by Modbus protocol. Define these structures per your needs in
  *   your application. Below is just an example of possible parameters.
  *====================================================================================*/
-#ifndef _DEVICE_PARAMS
-#define _DEVICE_PARAMS
+#ifndef MODBUS_PARAMS__H__
+#define MODBUS_PARAMS__H__
 
 #include <stdint.h>
 
@@ -38,25 +38,25 @@ typedef enum
 typedef enum
 {
     ENABLE_PELTIER_OVERRIDE = 0,
-    OVERRIDE_PELTIER_HIGH_SIDE_RELAY_STATE,
-    OVERRIDE_PELTIER_LOW_SIDE_RELAY_STATE,
+    OVERRIDE_PELTIER_COOLIN,
+    OVERRIDE_PELTIER_HEATING,
     MODBUS_PARAMS_COIL_COUNT,
 } ModbusParams_Coil_t;
 
 #define MODBUS_PARAMS_COIL_PORTS_COUNT ((uint8_t)(MODBUS_PARAMS_COIL_COUNT / 8) + 1)
 
-esp_err_t init_modbus_params(void *slave_handler);
+esp_err_t modbus_params_init(void *slave_handler);
 
-esp_err_t get_input_register_float_reg_area(ModbusParams_InReg_Float_t index, mb_register_area_descriptor_t *const reg_area);
-esp_err_t get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t index, mb_register_area_descriptor_t *const reg_area);
-esp_err_t get_coil_port_reg_area(uint8_t index, mb_register_area_descriptor_t *const reg_area);
+esp_err_t modbus_params_get_input_register_float_reg_area(ModbusParams_InReg_Float_t index, mb_register_area_descriptor_t *const reg_area);
+esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t index, mb_register_area_descriptor_t *const reg_area);
+esp_err_t modbus_params_get_coil_port_reg_area(uint8_t index, mb_register_area_descriptor_t *const reg_area);
 
-esp_err_t set_input_register_float(ModbusParams_InReg_Float_t index, float value);
+esp_err_t modbus_params_set_input_register_float(ModbusParams_InReg_Float_t index, float value);
 
-esp_err_t set_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t value);
-esp_err_t get_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t *const value);
+esp_err_t modbus_params_set_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t value);
+esp_err_t modbus_params_get_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t *const value);
 
-esp_err_t set_coil_state(ModbusParams_Coil_t index, bool state);
-esp_err_t get_coil_state(ModbusParams_Coil_t index, bool *const state);
+esp_err_t modbus_params_set_coil_state(ModbusParams_Coil_t index, bool state);
+esp_err_t modbus_params_get_coil_state(ModbusParams_Coil_t index, bool *const state);
 
-#endif // !defined(_DEVICE_PARAMS)
+#endif // MODBUS_PARAMS__H__
