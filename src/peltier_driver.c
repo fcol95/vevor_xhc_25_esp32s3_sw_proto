@@ -258,6 +258,7 @@ void peltier_driver_task(void *pvParameter)
             if (last_peltier_override_state)
             {
                 ESP_LOGI(LOG_TAG, "Peltier override removed!");
+                last_peltier_override_state = false;
             }
 
             PeltierDriver_Command_t requested_command = PELTIER_DRIVER_COMMAND_NONE;
