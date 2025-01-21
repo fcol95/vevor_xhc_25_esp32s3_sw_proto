@@ -10,8 +10,8 @@
 
 static const char *LOG_TAG = "peltier_driver";
 
-#define PELTIER_HIGH_SIDE_RELAY_OUTPUT (gpio_num_t)8
-#define PELTIER_LOW_SIDE_RELAY_OUTPUT (gpio_num_t)9
+#define PELTIER_HIGH_SIDE_RELAY_OUTPUT (gpio_num_t)6
+#define PELTIER_LOW_SIDE_RELAY_OUTPUT (gpio_num_t)7
 
 #define PELTIER_TOGGLING_DELAY_MS 10
 
@@ -23,8 +23,6 @@ esp_err_t peltier_driver_init(void)
     gpio_set_direction(PELTIER_LOW_SIDE_RELAY_OUTPUT, GPIO_MODE_OUTPUT);
 
     gpio_set_level(PELTIER_HIGH_SIDE_RELAY_OUTPUT, 0);
-    vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
-
     gpio_set_level(PELTIER_LOW_SIDE_RELAY_OUTPUT, 0);
     vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
 
