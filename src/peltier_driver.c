@@ -10,7 +10,7 @@
 
 static const char *LOG_TAG = "peltier_driver";
 
-#define PELTIER_HIGH_SIDE_RELAY_OUTPUT (gpio_num_t)1 // XIAO ESP32S3 D6 U0TXD (UART0 TXD)
+#define PELTIER_HIGH_SIDE_RELAY_OUTPUT (gpio_num_t)3 // XIAO ESP32S3 A2
 #define PELTIER_LOW_SIDE_RELAY_OUTPUT (gpio_num_t)2  // XIAO ESP32S3 A1
 
 #define PELTIER_TOGGLING_DELAY_MS 10
