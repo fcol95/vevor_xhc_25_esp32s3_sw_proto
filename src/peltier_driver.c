@@ -10,8 +10,8 @@
 
 static const char *LOG_TAG = "peltier_driver";
 
-#define PELTIER_HIGH_SIDE_RELAY_OUTPUT (gpio_num_t)6
-#define PELTIER_LOW_SIDE_RELAY_OUTPUT (gpio_num_t)7
+#define PELTIER_HIGH_SIDE_RELAY_OUTPUT (gpio_num_t)1 // XIAO ESP32S3 D6 U0TXD (UART0 TXD)
+#define PELTIER_LOW_SIDE_RELAY_OUTPUT (gpio_num_t)2  // XIAO ESP32S3 A1
 
 #define PELTIER_TOGGLING_DELAY_MS 10
 
@@ -19,11 +19,34 @@ esp_err_t peltier_driver_init(void)
 {
     esp_err_t ret = ESP_OK;
 
-    gpio_set_direction(PELTIER_HIGH_SIDE_RELAY_OUTPUT, GPIO_MODE_OUTPUT);
-    gpio_set_direction(PELTIER_LOW_SIDE_RELAY_OUTPUT, GPIO_MODE_OUTPUT);
+    ret = gpio_set_direction(PELTIER_HIGH_SIDE_RELAY_OUTPUT, GPIO_MODE_OUTPUT);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(LOG_TAG, "Failed to set direction gpio for PELTIER_HIGH_SIDE_RELAY_OUTPUT!");
+        return ret;
+    }
 
-    gpio_set_level(PELTIER_HIGH_SIDE_RELAY_OUTPUT, 0);
-    gpio_set_level(PELTIER_LOW_SIDE_RELAY_OUTPUT, 0);
+    ret = gpio_set_direction(PELTIER_LOW_SIDE_RELAY_OUTPUT, GPIO_MODE_OUTPUT);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(LOG_TAG, "Failed to set direction gpio for PELTIER_LOW_SIDE_RELAY_OUTPUT!");
+        return ret;
+    }
+
+    ret = gpio_set_level(PELTIER_HIGH_SIDE_RELAY_OUTPUT, 0);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(LOG_TAG, "Failed to set gpio for PELTIER_HIGH_SIDE_RELAY_OUTPUT!");
+        return ret;
+    }
+
+    ret = gpio_set_level(PELTIER_LOW_SIDE_RELAY_OUTPUT, 0);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(LOG_TAG, "Failed to set gpio for PELTIER_LOW_SIDE_RELAY_OUTPUT!");
+        return ret;
+    }
+
     vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
 
     return ret;
@@ -97,10 +120,11 @@ void peltier_driver_task(void *pvParameter)
             {
                 ESP_LOGI(LOG_TAG, "Peltier override removed!");
                 last_peltier_override_state = false;
+                gpio_set_level(PELTIER_HIGH_SIDE_RELAY_OUTPUT, 0);
+                gpio_set_level(PELTIER_LOW_SIDE_RELAY_OUTPUT, 0);
+                vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
             }
-            gpio_set_level(PELTIER_HIGH_SIDE_RELAY_OUTPUT, 0);
-            gpio_set_level(PELTIER_LOW_SIDE_RELAY_OUTPUT, 0);
-            vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
+            // TODO: Add internal logic here!
         }
         vTaskDelay(pdMS_TO_TICKS(100));
     }

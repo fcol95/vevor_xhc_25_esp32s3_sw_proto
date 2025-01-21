@@ -101,11 +101,11 @@ static esp_err_t setup_reg_data(void)
             return ESP_FAIL;
     }
     // Define initial state of parameters
-    for (ModbusParams_Coil_t coil_ind = (ModbusParams_Coil_t)0; coil_ind < MODBUS_PARAMS_COIL_PORTS_COUNT; coil_ind++)
+    for (uint8_t coil_port_ind = 0; coil_port_ind < MODBUS_PARAMS_COIL_PORTS_COUNT; coil_port_ind++)
     {
-        coil_params.ports[coil_ind] = 0x0;
-        coil_params_mutexes.ports[coil_ind] = xSemaphoreCreateMutex();
-        if (coil_params_mutexes.ports[coil_ind] == NULL)
+        coil_params.ports[coil_port_ind] = 0x0;
+        coil_params_mutexes.ports[coil_port_ind] = xSemaphoreCreateMutex();
+        if (coil_params_mutexes.ports[coil_port_ind] == NULL)
             return ESP_FAIL;
     }
     return ESP_OK;
