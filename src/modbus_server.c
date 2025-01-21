@@ -229,13 +229,13 @@ static esp_err_t slave_init()
         ret = modbus_params_get_input_register_float_reg_area(float_ind, &reg_area);
         MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "modbus_params_get_input_register_float_reg_area fail for float index %d, returns(0x%x).",
+                           "modbus_params_get_input_register_float_reg_area fail for input reg float index %d, returns(0x%x).",
                            float_ind, (int)ret);
 
         ret = mbc_slave_set_descriptor(slave_handler, reg_area);
         MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "mbc_slave_set_descriptor fail for float index %d, returns(0x%x).",
+                           "mbc_slave_set_descriptor fail for input reg float index %d, returns(0x%x).",
                            float_ind, (int)ret);
     }
     // Initialization of Holding Registers area
@@ -245,31 +245,46 @@ static esp_err_t slave_init()
         ret = modbus_params_get_holding_register_uint_reg_area(uint_ind, &reg_area);
         MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "modbus_params_get_holding_register_uint_reg_area fail for int index %d, returns(0x%x).",
+                           "modbus_params_get_holding_register_uint_reg_area fail for hold reg uint index %d, returns(0x%x).",
                            uint_ind, (int)ret);
 
         ret = mbc_slave_set_descriptor(slave_handler, reg_area);
         MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "mbc_slave_set_descriptor fail for int index %d, returns(0x%x).",
+                           "mbc_slave_set_descriptor fail for hold reg uint index %d, returns(0x%x).",
                            uint_ind, (int)ret);
+    }
+    for (ModbusParams_HoldReg_Float_t float_ind = (ModbusParams_HoldReg_Float_t)0; float_ind < MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT; float_ind++)
+    {
+        mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
+        ret = modbus_params_get_holding_register_float_reg_area(float_ind, &reg_area);
+        MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
+                           LOG_TAG,
+                           "modbus_params_get_holding_register_float_reg_area fail for hold reg float index %d, returns(0x%x).",
+                           float_ind, (int)ret);
+
+        ret = mbc_slave_set_descriptor(slave_handler, reg_area);
+        MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
+                           LOG_TAG,
+                           "mbc_slave_set_descriptor fail for hold reg float index %d, returns(0x%x).",
+                           float_ind, (int)ret);
     }
 
     // Initialization of Coils ports registers area
-    for (uint8_t coil_ind = 0; coil_ind < MODBUS_PARAMS_COIL_PORTS_COUNT; coil_ind++)
+    for (uint8_t coil_port_ind = 0; coil_port_ind < MODBUS_PARAMS_COIL_PORTS_COUNT; coil_port_ind++)
     {
         mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
-        ret = modbus_params_get_coil_port_reg_area(coil_ind, &reg_area);
+        ret = modbus_params_get_coil_port_reg_area(coil_port_ind, &reg_area);
         MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "modbus_params_get_coil_port_reg_area fail for int index %d, returns(0x%x).",
-                           coil_ind, (int)ret);
+                           "modbus_params_get_coil_port_reg_area fail for coil port index %d, returns(0x%x).",
+                           coil_port_ind, (int)ret);
 
         ret = mbc_slave_set_descriptor(slave_handler, reg_area);
         MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "mbc_slave_set_descriptor fail for int index %d, returns(0x%x).",
-                           coil_ind, (int)ret);
+                           "mbc_slave_set_descriptor fail for coil port index %d, returns(0x%x).",
+                           coil_port_ind, (int)ret);
     }
 
     // Starts of modbus controller and stack

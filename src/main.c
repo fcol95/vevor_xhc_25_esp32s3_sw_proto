@@ -14,6 +14,7 @@
 #include "temp_sense.h"
 #include "peltier_driver.h"
 #include "modbus_server.h"
+#include "temp_control.h"
 
 static const char *LOG_TAG = "main";
 
@@ -83,6 +84,8 @@ void app_main()
 
     esp_err_t modbus_server_ret = modbus_server_init();
 
+    esp_err_t temp_control_ret = temp_control_init();
+
     // Tasks Init
     xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
     if (temp_sense_ret == ESP_OK)
@@ -107,6 +110,14 @@ void app_main()
     }
     else
     {
-        ESP_LOGE(LOG_TAG, "Failed to initialize Peltier control!");
+        ESP_LOGE(LOG_TAG, "Failed to initialize Peltier driver!");
+    }
+    if (peltier_driver_ret == ESP_OK && temp_sense_ret == ESP_OK && temp_control_ret == ESP_OK)
+    {
+        xTaskCreate(&temp_control_task, "temp_control_task", configMINIMAL_STACK_SIZE * 2, NULL, 5, NULL);
+    }
+    else
+    {
+        ESP_LOGE(LOG_TAG, "Failed to initialize Temp Controller!");
     }
 }

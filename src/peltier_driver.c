@@ -7,7 +7,7 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 
-#include "modbus_params.h"
+#include "modbus_params.h" // Move management of get/set params to "modbus_master" code?
 
 static const char *LOG_TAG = "peltier_driver";
 
@@ -16,7 +16,7 @@ static const char *LOG_TAG = "peltier_driver";
 
 #define PELTIER_TOGGLING_DELAY_MS 10
 
-#define PELTIER_MUTEX_TIMEOUT_MS 100
+#define PELTIER_MUTEX_TIMEOUT_MS 10U
 
 static PeltierDriver_Command_t s_current_command = PELTIER_DRIVER_COMMAND_NONE;
 static PeltierDriver_Command_t s_requested_command = PELTIER_DRIVER_COMMAND_NONE;
@@ -207,10 +207,10 @@ void peltier_driver_task(void *pvParameter)
         }
         static bool last_cooling_override_state = false;
         bool cooling_override_state = false;
-        esp_err_t ret_high = modbus_params_get_coil_state(OVERRIDE_PELTIER_COOLIN, &cooling_override_state);
+        esp_err_t ret_high = modbus_params_get_coil_state(OVERRIDE_PELTIER_COOLING, &cooling_override_state);
         if (ret_high != ESP_OK)
         {
-            ESP_LOGE(LOG_TAG, "Failed to get modbus parameter OVERRIDE_PELTIER_COOLIN!");
+            ESP_LOGE(LOG_TAG, "Failed to get modbus parameter OVERRIDE_PELTIER_COOLING!");
         }
         static bool last_heating_override_state = false;
         bool heating_override_state = false;
