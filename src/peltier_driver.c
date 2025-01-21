@@ -33,46 +33,47 @@ esp_err_t peltier_driver_init(void)
 
 void peltier_driver_task(void *pvParameter)
 {
-    esp_err_t ret = ESP_OK;
     while (1)
     {
         static bool last_peltier_override_state = false;
         // Check if peltier override is requested by modbus master
         bool peltier_override_requested = false;
-        ret = get_coil_state(ENABLE_PELTIER_OVERRIDE, &peltier_override_requested);
-        if (ret != ESP_OK)
+        esp_err_t ret_override = get_coil_state(ENABLE_PELTIER_OVERRIDE, &peltier_override_requested);
+        if (ret_override != ESP_OK)
         {
             ESP_LOGE(LOG_TAG, "Failed to get modbus parameter ENABLE_PELTIER_OVERRIDE!");
         }
-        if (peltier_override_requested)
+        static bool last_high_side_override_state = false;
+        bool high_side_override_state = false;
+        esp_err_t ret_high = get_coil_state(OVERRIDE_PELTIER_HIGH_SIDE_RELAY_STATE, &high_side_override_state);
+        if (ret_high != ESP_OK)
+        {
+            ESP_LOGE(LOG_TAG, "Failed to get modbus parameter OVERRIDE_PELTIER_HIGH_SIDE_RELAY_STATE!");
+        }
+        static bool last_low_side_override_state = false;
+        bool low_side_override_state = false;
+        esp_err_t ret_low = get_coil_state(OVERRIDE_PELTIER_LOW_SIDE_RELAY_STATE, &low_side_override_state);
+        if (ret_low != ESP_OK)
+        {
+            ESP_LOGE(LOG_TAG, "Failed to get modbus parameter OVERRIDE_PELTIER_LOW_SIDE_RELAY_STATE!");
+        }
+
+        if (ret_override == ESP_OK && ret_high == ESP_OK && ret_low == ESP_OK && peltier_override_requested)
         {
             if (!last_peltier_override_state)
             {
                 ESP_LOGI(LOG_TAG, "Peltier override requested!");
                 last_peltier_override_state = true;
             }
-            static bool last_high_side_override_state = false;
-            bool high_side_override_state = false;
-            ret = get_coil_state(OVERRIDE_PELTIER_HIGH_SIDE_RELAY_STATE, &high_side_override_state);
-            if (ret != ESP_OK)
-            {
-                ESP_LOGE(LOG_TAG, "Failed to get modbus parameter OVERRIDE_PELTIER_HIGH_SIDE_RELAY_STATE!");
-            }
-            static bool last_low_side_override_state = false;
-            bool low_side_override_state = false;
-            ret = get_coil_state(OVERRIDE_PELTIER_LOW_SIDE_RELAY_STATE, &low_side_override_state);
-            if (ret != ESP_OK)
-            {
-                ESP_LOGE(LOG_TAG, "Failed to get modbus parameter OVERRIDE_PELTIER_LOW_SIDE_RELAY_STATE!");
-            }
             if (last_high_side_override_state != high_side_override_state || last_low_side_override_state != low_side_override_state)
             {
+                last_high_side_override_state = high_side_override_state;
+                last_low_side_override_state = low_side_override_state;
                 ESP_LOGI(LOG_TAG, "Peltier override state change!");
                 if (high_side_override_state && !low_side_override_state)
                 {
                     ESP_LOGI(LOG_TAG, "High side override!");
                     gpio_set_level(PELTIER_LOW_SIDE_RELAY_OUTPUT, 0);
-                    vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
                     gpio_set_level(PELTIER_HIGH_SIDE_RELAY_OUTPUT, 1);
                     vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
                 }
@@ -80,7 +81,6 @@ void peltier_driver_task(void *pvParameter)
                 {
                     ESP_LOGI(LOG_TAG, "Low side override!");
                     gpio_set_level(PELTIER_HIGH_SIDE_RELAY_OUTPUT, 0);
-                    vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
                     gpio_set_level(PELTIER_LOW_SIDE_RELAY_OUTPUT, 1);
                     vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
                 }
@@ -88,7 +88,6 @@ void peltier_driver_task(void *pvParameter)
                 {
                     ESP_LOGI(LOG_TAG, "Disable override!");
                     gpio_set_level(PELTIER_HIGH_SIDE_RELAY_OUTPUT, 0);
-                    vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
                     gpio_set_level(PELTIER_LOW_SIDE_RELAY_OUTPUT, 0);
                     vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
                 }
@@ -102,11 +101,9 @@ void peltier_driver_task(void *pvParameter)
                 last_peltier_override_state = false;
             }
             gpio_set_level(PELTIER_HIGH_SIDE_RELAY_OUTPUT, 0);
-            vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
             gpio_set_level(PELTIER_LOW_SIDE_RELAY_OUTPUT, 0);
             vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
         }
-
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
