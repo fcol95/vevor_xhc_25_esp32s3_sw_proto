@@ -43,11 +43,13 @@ typedef enum
     MODBUS_PARAMS_COIL_COUNT,
 } ModbusParams_Coil_t;
 
+#define MODBUS_PARAMS_COIL_PORTS_COUNT ((uint8_t)(MODBUS_PARAMS_COIL_COUNT / 8) + 1)
+
 esp_err_t init_modbus_params(void *slave_handler);
 
 esp_err_t get_input_register_float_reg_area(ModbusParams_InReg_Float_t index, mb_register_area_descriptor_t *const reg_area);
 esp_err_t get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t index, mb_register_area_descriptor_t *const reg_area);
-esp_err_t get_coil_reg_area(ModbusParams_Coil_t index, mb_register_area_descriptor_t *const reg_area);
+esp_err_t get_coil_port_reg_area(uint8_t index, mb_register_area_descriptor_t *const reg_area);
 
 esp_err_t set_input_register_float(ModbusParams_InReg_Float_t index, float value);
 

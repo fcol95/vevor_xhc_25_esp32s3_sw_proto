@@ -255,14 +255,14 @@ static esp_err_t slave_init()
                            uint_ind, (int)ret);
     }
 
-    // Initialization of Coils registers area
-    for (ModbusParams_Coil_t coil_ind = (ModbusParams_Coil_t)0; coil_ind < MODBUS_PARAMS_COIL_COUNT; coil_ind++)
+    // Initialization of Coils ports registers area
+    for (uint8_t coil_ind = 0; coil_ind < MODBUS_PARAMS_COIL_PORTS_COUNT; coil_ind++)
     {
         mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
-        ret = get_coil_reg_area(coil_ind, &reg_area);
+        ret = get_coil_port_reg_area(coil_ind, &reg_area);
         MB_RETURN_ON_FALSE((ret == ESP_OK), ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "get_coil_reg_area fail for int index %d, returns(0x%x).",
+                           "get_coil_port_reg_area fail for int index %d, returns(0x%x).",
                            coil_ind, (int)ret);
 
         ret = mbc_slave_set_descriptor(slave_handler, reg_area);
