@@ -113,7 +113,7 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
     }
     else if (abort_control || (delta_temp_degc <= TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC && delta_temp_degc >= -TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC))
     {
-        if ((abort_control || first_run || get_elapsed_time_ms(last_command_change_time_ms) > TEMP_CONTROLLER_MINIMUM_ELAPSED_TIME_BETWEEN_COMMANDS_MS) && s_last_known_peltier_command != PELTIER_DRIVER_COMMAND_NONE || s_last_known_peltier_command != current_command)
+        if ((abort_control || first_run || (get_elapsed_time_ms(last_command_change_time_ms) > TEMP_CONTROLLER_MINIMUM_ELAPSED_TIME_BETWEEN_COMMANDS_MS)) && (s_last_known_peltier_command != PELTIER_DRIVER_COMMAND_NONE || s_last_known_peltier_command != current_command))
         {
             const PeltierDriver_Command_t new_command = PELTIER_DRIVER_COMMAND_NONE;
             ret = peltier_driver_set_requested_command(PELTIER_DRIVER_COMMAND_NONE);
