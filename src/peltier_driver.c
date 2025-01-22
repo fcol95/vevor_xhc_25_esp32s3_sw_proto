@@ -125,7 +125,7 @@ static esp_err_t enact_command(PeltierDriver_Command_t command)
         ESP_LOGE(LOG_TAG, "Failed to set gpio for PELTIER_HIGH_SIDE_RELAY_OUTPUT!");
         return high_ret;
     }
-    if (low_ret != ESP_OK)
+    else if (low_ret != ESP_OK)
     {
         ESP_LOGE(LOG_TAG, "Failed to set gpio for PELTIER_HIGH_SIDE_RELAY_OUTPUT!");
         return low_ret;
