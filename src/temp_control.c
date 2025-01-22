@@ -79,7 +79,8 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
     }
 
     float delta_temp_degc = requested_temp_degc - actual_temp_degc;
-    if (delta_temp_degc >= TEMP_CONTROLLER_HYSTERESIS_DEGC)
+    if (s_last_known_peltier_command == PELTIER_DRIVER_COMMAND_NONE
+        && delta_temp_degc >= TEMP_CONTROLLER_HYSTERESIS_DEGC)
     {
         if ((first_run
              || get_elapsed_time_ms(last_command_change_time_ms)
@@ -102,7 +103,8 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
                      delta_temp_degc);
         }
     }
-    else if (delta_temp_degc <= -TEMP_CONTROLLER_HYSTERESIS_DEGC)
+    else if (s_last_known_peltier_command == PELTIER_DRIVER_COMMAND_NONE
+             && delta_temp_degc <= -TEMP_CONTROLLER_HYSTERESIS_DEGC)
     {
         if ((first_run
              || get_elapsed_time_ms(last_command_change_time_ms)
