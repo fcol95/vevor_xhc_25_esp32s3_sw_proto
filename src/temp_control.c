@@ -183,9 +183,10 @@ void temp_control_task(void *pvParameter)
     uint8_t   error_count = 0;
     while (1)
     {
-        static bool last_temp_control_enabled = false;
-        bool        temp_control_enabled = false;
-        esp_err_t   ret_enabled = modbus_params_get_coil_state(ENABLE_TEMP_CONTROL, &temp_control_enabled);
+        static bool last_enable_temp_control = false;
+        static bool waiting_on_valid_temp_request = true;
+        bool        enable_temp_control = false;
+        esp_err_t   ret_enabled = modbus_params_get_coil_state(ENABLE_TEMP_CONTROL, &enable_temp_control);
         if (ret_enabled != ESP_OK)
         {
             ESP_LOGE(LOG_TAG, "Failed to get modbus parameter ENABLE_TEMP_CONTROL!");
@@ -193,20 +194,20 @@ void temp_control_task(void *pvParameter)
         }
         else
         {
-            if (last_temp_control_enabled && !temp_control_enabled)
+            if (last_enable_temp_control && !enable_temp_control)
             {
                 ESP_LOGI(LOG_TAG, "Disabling temperature controller!");
-                last_temp_control_enabled = temp_control_enabled;
+                last_enable_temp_control = enable_temp_control;
             }
-            else if (!last_temp_control_enabled && temp_control_enabled)
+            else if (!last_enable_temp_control && enable_temp_control)
             {
                 ESP_LOGI(LOG_TAG, "Enabling temperature controller!");
-                last_temp_control_enabled = temp_control_enabled;
+                last_enable_temp_control = enable_temp_control;
             }
         }
         // TODO: Clean this up!
         if (s_last_known_peltier_command != PELTIER_DRIVER_COMMAND_NONE
-            && ((!temp_control_enabled && ret_enabled == ESP_OK) || error_count > TEMP_CONTROL_MAX_ERROR_COUNT))
+            && ((!enable_temp_control && ret_enabled == ESP_OK) || error_count > TEMP_CONTROL_MAX_ERROR_COUNT))
         {
             if (error_count > TEMP_CONTROL_MAX_ERROR_COUNT)
             {
@@ -237,11 +238,11 @@ void temp_control_task(void *pvParameter)
             {
                 ESP_LOGE(LOG_TAG, "Failed to update modbus parameter TEMP_CONTROL_ENABLED!");
             }
+            waiting_on_valid_temp_request = true;
         }
-        if (temp_control_enabled && ret_enabled == ESP_OK)
+        if (enable_temp_control && ret_enabled == ESP_OK)
         {
-            static bool waiting_on_valid_temp_request = true;
-            float       requested_temp_degc = NAN;
+            float requested_temp_degc = NAN;
             ret = modbus_params_get_holding_register_float(REQUESTED_TEMP_DEGC, &requested_temp_degc);
             if ((ret == ESP_OK) && finitef(requested_temp_degc))
             {
