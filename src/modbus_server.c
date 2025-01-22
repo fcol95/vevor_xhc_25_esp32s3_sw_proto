@@ -420,6 +420,13 @@ void modbus_server_task(void *pvParameter)
     ESP_LOGI(LOG_TAG, "Start modbus server loop...");
 
     // Currently this loop only log in verbose the requests from the master
+    /*TODO: Add a way to handle following error (happens when pymodbus master doesn't properly close/disconnect - i.e.
+script is killed):
+
+I (57756) port.utils: Socket (#58), accept client connection from address[port]: 192.168.10.30[62889]
+E (57756) mb_driver: 0x3fcb7a28, unable to open node: 192.168.10.30
+
+    */
     while (1)
     {
         // Check for read/write events of Modbus master for certain events
