@@ -204,7 +204,7 @@ void temp_control_task(void *pvParameter)
                 last_temp_control_enabled = temp_control_enabled;
             }
         }
-
+        // TODO: Clean this up!
         if (s_last_known_peltier_command != PELTIER_DRIVER_COMMAND_NONE
             && ((!temp_control_enabled && ret_enabled == ESP_OK) || error_count > TEMP_CONTROL_MAX_ERROR_COUNT))
         {
@@ -232,6 +232,11 @@ void temp_control_task(void *pvParameter)
                 s_last_known_peltier_command = PELTIER_DRIVER_COMMAND_NONE;
                 error_count = 0;
             }
+            ret = modbus_params_set_discrete_input_state(TEMP_CONTROL_ENABLED, false);
+            if (ret != ESP_OK)
+            {
+                ESP_LOGE(LOG_TAG, "Failed to update modbus parameter TEMP_CONTROL_ENABLED!");
+            }
         }
         if (temp_control_enabled && ret_enabled == ESP_OK)
         {
@@ -244,6 +249,12 @@ void temp_control_task(void *pvParameter)
                 {
                     waiting_on_valid_temp_request = false;
                     ESP_LOGI(LOG_TAG, "Starting temperature controller with request %.2fdegC!", requested_temp_degc);
+                    // Set temperature controller enabled modbus parameter
+                    ret = modbus_params_set_discrete_input_state(TEMP_CONTROL_ENABLED, true);
+                    if (ret != ESP_OK)
+                    {
+                        ESP_LOGE(LOG_TAG, "Failed to update modbus parameter TEMP_CONTROL_ENABLED!");
+                    }
                 }
                 esp_err_t controller_ret = temp_controller_execute(requested_temp_degc);
                 if (controller_ret == ESP_OK)

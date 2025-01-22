@@ -56,6 +56,17 @@ typedef struct
     QueueHandle_t ports[MODBUS_PARAMS_COIL_PORTS_COUNT];
 } coil_reg_params_mutexes_t;
 
+#pragma pack(push, 1)
+typedef struct
+{
+    bool ports[MODBUS_PARAMS_DISCRETE_INPUT_PORTS_COUNT];
+} discrete_input_reg_params_t;
+#pragma pack(pop)
+typedef struct
+{
+    QueueHandle_t ports[MODBUS_PARAMS_DISCRETE_INPUT_PORTS_COUNT];
+} discrete_input_reg_params_mutexes_t;
+
 input_reg_params_t         input_reg_params = {0};
 input_reg_params_mutexes_t input_reg_params_mutexes = {0};
 
@@ -64,6 +75,9 @@ holding_reg_params_mutexes_t holding_reg_params_mutexes = {0};
 
 coil_reg_params_t         coil_params = {0};
 coil_reg_params_mutexes_t coil_params_mutexes = {0};
+
+discrete_input_reg_params_t         discrete_input_params = {0};
+discrete_input_reg_params_mutexes_t discrete_input_params_mutexes = {0};
 
 // TODO: Add logic to have min/max values for parameters
 
@@ -216,6 +230,21 @@ esp_err_t modbus_params_get_coil_port_reg_area(uint8_t index, mb_register_area_d
     reg_area->address = (void *)&coil_params.ports[index];
     reg_area->size = sizeof(bool);
     reg_area->access = MB_ACCESS_RW;
+
+    return ESP_OK;
+}
+
+esp_err_t modbus_params_get_discrete_input_port_reg_area(ModbusParams_DiscreteInput_t         index,
+                                                         mb_register_area_descriptor_t *const reg_area)
+{
+    if (index >= MODBUS_PARAMS_DISCRETE_INPUT_COUNT) return ESP_FAIL;
+    if (reg_area == NULL) return ESP_FAIL;
+
+    reg_area->type = MB_PARAM_DISCRETE;
+    reg_area->start_offset = (offsetof(discrete_input_reg_params_t, ports) + index * sizeof(bool));
+    reg_area->address = (void *)&discrete_input_params.ports[index];
+    reg_area->size = sizeof(bool);
+    reg_area->access = MB_ACCESS_RO;
 
     return ESP_OK;
 }
@@ -389,6 +418,30 @@ esp_err_t modbus_params_get_coil_state(ModbusParams_Coil_t index, bool *const st
     *state = get_bit(coil_params.ports[port_index], port_offset);
     ret = mbc_slave_unlock(slave_handler_ctx);
     xSemaphoreGive(coil_params_mutexes.ports[port_index]);
+    if (ret != ESP_OK) return ret;
+    return ESP_OK;
+}
+
+esp_err_t modbus_params_set_discrete_input_state(ModbusParams_DiscreteInput_t index, bool state)
+{
+    if (index >= MODBUS_PARAMS_DISCRETE_INPUT_COUNT) return ESP_FAIL;
+
+    uint8_t port_index = (uint8_t)(index / 8);
+    uint8_t port_offset = (uint8_t)(index % 8);
+
+    esp_err_t ret = ESP_OK;
+    if (xSemaphoreTake(discrete_input_params_mutexes.ports[port_index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS))
+        != pdTRUE)
+        return ESP_FAIL;
+    ret = mbc_slave_lock(slave_handler_ctx);
+    if (ret != ESP_OK)
+    {
+        xSemaphoreGive(discrete_input_params_mutexes.ports[port_index]);
+        return ret;
+    }
+    discrete_input_params.ports[port_index] = set_bit(discrete_input_params.ports[port_index], state, port_offset);
+    ret = mbc_slave_unlock(slave_handler_ctx);
+    xSemaphoreGive(discrete_input_params_mutexes.ports[port_index]);
     if (ret != ESP_OK) return ret;
     return ESP_OK;
 }

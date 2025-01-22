@@ -336,6 +336,28 @@ static esp_err_t slave_init()
                            coil_port_ind,
                            (int)ret);
     }
+    // Initialization of Discrete Input ports registers area
+    for (uint8_t discrete_port_ind = 0; discrete_port_ind < MODBUS_PARAMS_DISCRETE_INPUT_PORTS_COUNT;
+         discrete_port_ind++)
+    {
+        mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
+        ret = modbus_params_get_discrete_input_port_reg_area(discrete_port_ind, &reg_area);
+        MB_RETURN_ON_FALSE(
+            (ret == ESP_OK),
+            ESP_ERR_INVALID_STATE,
+            LOG_TAG,
+            "modbus_params_get_discrete_input_port_reg_area fail for discrete port index %d, returns(0x%x).",
+            discrete_port_ind,
+            (int)ret);
+
+        ret = mbc_slave_set_descriptor(slave_handler, reg_area);
+        MB_RETURN_ON_FALSE((ret == ESP_OK),
+                           ESP_ERR_INVALID_STATE,
+                           LOG_TAG,
+                           "mbc_slave_set_descriptor fail for discrete port index %d, returns(0x%x).",
+                           discrete_port_ind,
+                           (int)ret);
+    }
 
     // Starts of modbus controller and stack
     ret = mbc_slave_start(slave_handler);

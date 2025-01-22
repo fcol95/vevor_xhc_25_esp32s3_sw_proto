@@ -57,7 +57,14 @@ typedef enum
     MODBUS_PARAMS_COIL_COUNT,
 } ModbusParams_Coil_t;
 
-#define MODBUS_PARAMS_COIL_PORTS_COUNT ((uint8_t)(MODBUS_PARAMS_COIL_COUNT / 8) + 1)
+typedef enum
+{
+    TEMP_CONTROL_ENABLED = 0,
+    MODBUS_PARAMS_DISCRETE_INPUT_COUNT,
+} ModbusParams_DiscreteInput_t;
+
+#define MODBUS_PARAMS_COIL_PORTS_COUNT           ((uint8_t)(MODBUS_PARAMS_COIL_COUNT / 8) + 1)
+#define MODBUS_PARAMS_DISCRETE_INPUT_PORTS_COUNT ((uint8_t)(MODBUS_PARAMS_DISCRETE_INPUT_COUNT / 8) + 1)
 
 esp_err_t modbus_params_init(void *slave_handler);
 
@@ -70,6 +77,8 @@ esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_
 esp_err_t modbus_params_get_holding_register_float_reg_area(ModbusParams_HoldReg_Float_t         index,
                                                             mb_register_area_descriptor_t *const reg_area);
 esp_err_t modbus_params_get_coil_port_reg_area(uint8_t index, mb_register_area_descriptor_t *const reg_area);
+esp_err_t modbus_params_get_discrete_input_port_reg_area(ModbusParams_DiscreteInput_t         index,
+                                                         mb_register_area_descriptor_t *const reg_area);
 
 esp_err_t modbus_params_set_input_register_float(ModbusParams_InReg_Float_t index, float value);
 esp_err_t modbus_params_set_input_register_uint(ModbusParams_InReg_UInt_t index, uint16_t value);
@@ -82,5 +91,7 @@ esp_err_t modbus_params_get_holding_register_float(ModbusParams_HoldReg_Float_t 
 
 esp_err_t modbus_params_set_coil_state(ModbusParams_Coil_t index, bool state);
 esp_err_t modbus_params_get_coil_state(ModbusParams_Coil_t index, bool *const state);
+
+esp_err_t modbus_params_set_discrete_input_state(ModbusParams_DiscreteInput_t index, bool state);
 
 #endif // MODBUS_PARAMS__H__
