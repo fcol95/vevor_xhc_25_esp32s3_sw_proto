@@ -7,8 +7,8 @@
 typedef enum
 {
     PELTIER_DRIVER_COMMAND_NONE = 0,
-    PELTIER_DRIVER_COMMAND_COOL = -INT8_MIN,
-    PELTIER_DRIVER_COMMAND_HEAT = INT8_MAX,
+    PELTIER_DRIVER_COMMAND_COOL,
+    PELTIER_DRIVER_COMMAND_HEAT,
 } PeltierDriver_Command_t;
 
 esp_err_t peltier_driver_init(void);

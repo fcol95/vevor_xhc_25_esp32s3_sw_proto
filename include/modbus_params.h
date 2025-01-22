@@ -28,6 +28,11 @@ typedef enum
     ACTUAL_TEMP_DEGC = 0,
     MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT,
 } ModbusParams_InReg_Float_t;
+typedef enum
+{
+    PELTIER_DRIVER_STATE = 0,
+    MODBUS_PARAMS_INPUT_REGISTER_UINT_COUNT,
+} ModbusParams_InReg_UInt_t;
 
 typedef enum
 {
@@ -58,6 +63,8 @@ esp_err_t modbus_params_init(void *slave_handler);
 
 esp_err_t modbus_params_get_input_register_float_reg_area(ModbusParams_InReg_Float_t           index,
                                                           mb_register_area_descriptor_t *const reg_area);
+esp_err_t modbus_params_get_input_register_uint_reg_area(ModbusParams_InReg_UInt_t            index,
+                                                         mb_register_area_descriptor_t *const reg_area);
 esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t          index,
                                                            mb_register_area_descriptor_t *const reg_area);
 esp_err_t modbus_params_get_holding_register_float_reg_area(ModbusParams_HoldReg_Float_t         index,
@@ -65,6 +72,7 @@ esp_err_t modbus_params_get_holding_register_float_reg_area(ModbusParams_HoldReg
 esp_err_t modbus_params_get_coil_port_reg_area(uint8_t index, mb_register_area_descriptor_t *const reg_area);
 
 esp_err_t modbus_params_set_input_register_float(ModbusParams_InReg_Float_t index, float value);
+esp_err_t modbus_params_set_input_register_uint(ModbusParams_InReg_UInt_t index, uint16_t value);
 
 esp_err_t modbus_params_set_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t value);
 esp_err_t modbus_params_get_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t *const value);

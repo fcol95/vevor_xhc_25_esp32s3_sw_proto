@@ -137,6 +137,13 @@ static esp_err_t enact_command(PeltierDriver_Command_t command)
         {
             ESP_LOGE(LOG_TAG, "Failed to updated current command!");
         }
+        // Refresh modbus registers
+        ret = modbus_params_set_input_register_uint(PELTIER_DRIVER_STATE, (uint16_t)command);
+        if (ret != ESP_OK)
+        {
+            ESP_LOGE(LOG_TAG, "Failed to update modbus parameter PELTIER_DRIVER_STATE!");
+        }
+
         vTaskDelay(pdMS_TO_TICKS(PELTIER_TOGGLING_DELAY_MS));
 
         // TODO: Readback GPIO to confirm setting?

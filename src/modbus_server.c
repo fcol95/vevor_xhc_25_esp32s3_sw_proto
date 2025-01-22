@@ -248,18 +248,17 @@ static esp_err_t slave_init()
                            float_ind,
                            (int)ret);
     }
-    // Initialization of Holding Registers area
-    for (ModbusParams_HoldReg_UInt_t uint_ind = (ModbusParams_HoldReg_UInt_t)0;
-         uint_ind < MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT;
+    for (ModbusParams_InReg_UInt_t uint_ind = (ModbusParams_InReg_UInt_t)0;
+         uint_ind < MODBUS_PARAMS_INPUT_REGISTER_UINT_COUNT;
          uint_ind++)
     {
         mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
-        ret = modbus_params_get_holding_register_uint_reg_area(uint_ind, &reg_area);
+        ret = modbus_params_get_input_register_uint_reg_area(uint_ind, &reg_area);
         MB_RETURN_ON_FALSE(
             (ret == ESP_OK),
             ESP_ERR_INVALID_STATE,
             LOG_TAG,
-            "modbus_params_get_holding_register_uint_reg_area fail for hold reg uint index %d, returns(0x%x).",
+            "modbus_params_get_input_register_uint_reg_area fail for input reg uint index %d, returns(0x%x).",
             uint_ind,
             (int)ret);
 
@@ -267,10 +266,11 @@ static esp_err_t slave_init()
         MB_RETURN_ON_FALSE((ret == ESP_OK),
                            ESP_ERR_INVALID_STATE,
                            LOG_TAG,
-                           "mbc_slave_set_descriptor fail for hold reg uint index %d, returns(0x%x).",
+                           "mbc_slave_set_descriptor fail for input reg uint index %d, returns(0x%x).",
                            uint_ind,
                            (int)ret);
     }
+    // Initialization of Holding Registers area
     for (ModbusParams_HoldReg_Float_t float_ind = (ModbusParams_HoldReg_Float_t)0;
          float_ind < MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT;
          float_ind++)
@@ -291,6 +291,28 @@ static esp_err_t slave_init()
                            LOG_TAG,
                            "mbc_slave_set_descriptor fail for hold reg float index %d, returns(0x%x).",
                            float_ind,
+                           (int)ret);
+    }
+    for (ModbusParams_HoldReg_UInt_t uint_ind = (ModbusParams_HoldReg_UInt_t)0;
+         uint_ind < MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT;
+         uint_ind++)
+    {
+        mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
+        ret = modbus_params_get_holding_register_uint_reg_area(uint_ind, &reg_area);
+        MB_RETURN_ON_FALSE(
+            (ret == ESP_OK),
+            ESP_ERR_INVALID_STATE,
+            LOG_TAG,
+            "modbus_params_get_holding_register_uint_reg_area fail for hold reg uint index %d, returns(0x%x).",
+            uint_ind,
+            (int)ret);
+
+        ret = mbc_slave_set_descriptor(slave_handler, reg_area);
+        MB_RETURN_ON_FALSE((ret == ESP_OK),
+                           ESP_ERR_INVALID_STATE,
+                           LOG_TAG,
+                           "mbc_slave_set_descriptor fail for hold reg uint index %d, returns(0x%x).",
+                           uint_ind,
                            (int)ret);
     }
 
