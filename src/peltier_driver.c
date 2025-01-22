@@ -149,6 +149,34 @@ esp_err_t peltier_driver_init(void)
 {
     esp_err_t ret = ESP_OK;
 
+    ret = gpio_sleep_set_pull_mode(PELTIER_HIGH_SIDE_RELAY_OUTPUT, GPIO_PULLUP_PULLDOWN);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(LOG_TAG, "Failed to set sleep pull for gpio for PELTIER_HIGH_SIDE_RELAY_OUTPUT!");
+        return ret;
+    }
+
+    ret = gpio_sleep_set_pull_mode(PELTIER_LOW_SIDE_RELAY_OUTPUT, GPIO_PULLUP_PULLDOWN);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(LOG_TAG, "Failed to set sleep pull for gpio for PELTIER_LOW_SIDE_RELAY_OUTPUT!");
+        return ret;
+    }
+
+    ret = gpio_set_pull_mode(PELTIER_HIGH_SIDE_RELAY_OUTPUT, GPIO_PULLUP_PULLDOWN);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(LOG_TAG, "Failed to set pull for gpio for PELTIER_HIGH_SIDE_RELAY_OUTPUT!");
+        return ret;
+    }
+
+    ret = gpio_set_pull_mode(PELTIER_LOW_SIDE_RELAY_OUTPUT, GPIO_PULLUP_PULLDOWN);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(LOG_TAG, "Failed to set pull for gpio for PELTIER_LOW_SIDE_RELAY_OUTPUT!");
+        return ret;
+    }
+
     ret = gpio_set_direction(PELTIER_HIGH_SIDE_RELAY_OUTPUT, GPIO_MODE_OUTPUT);
     if (ret != ESP_OK)
     {
