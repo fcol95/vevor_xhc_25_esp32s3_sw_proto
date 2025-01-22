@@ -47,8 +47,7 @@ typedef struct
 #pragma pack(push, 1)
 typedef struct
 {
-    bool ports[MODBUS_PARAMS_COIL_PORTS_COUNT]; // TODO: Optimize this to not use a full byte per coil, do a bitfield
-                                                // with ports?
+    bool ports[MODBUS_PARAMS_COIL_PORTS_COUNT];
 } coil_reg_params_t;
 #pragma pack(pop)
 typedef struct
