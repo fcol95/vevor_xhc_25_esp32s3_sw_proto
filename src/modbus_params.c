@@ -27,8 +27,8 @@ typedef struct
 #pragma pack(pop)
 typedef struct
 {
-    QueueHandle_t floats[MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT];
-    QueueHandle_t uints[MODBUS_PARAMS_INPUT_REGISTER_UINT_COUNT];
+    SemaphoreHandle_t floats[MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT];
+    SemaphoreHandle_t uints[MODBUS_PARAMS_INPUT_REGISTER_UINT_COUNT];
 } input_reg_params_mutexes_t;
 
 #pragma pack(push, 1)
@@ -40,8 +40,8 @@ typedef struct
 #pragma pack(pop)
 typedef struct
 {
-    QueueHandle_t floats[MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT];
-    QueueHandle_t uints[MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT];
+    SemaphoreHandle_t floats[MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT];
+    SemaphoreHandle_t uints[MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT];
 } holding_reg_params_mutexes_t;
 
 #pragma pack(push, 1)
@@ -53,7 +53,7 @@ typedef struct
 #pragma pack(pop)
 typedef struct
 {
-    QueueHandle_t ports[MODBUS_PARAMS_COIL_PORTS_COUNT];
+    SemaphoreHandle_t ports[MODBUS_PARAMS_COIL_PORTS_COUNT];
 } coil_reg_params_mutexes_t;
 
 #pragma pack(push, 1)
@@ -64,7 +64,7 @@ typedef struct
 #pragma pack(pop)
 typedef struct
 {
-    QueueHandle_t ports[MODBUS_PARAMS_DISCRETE_INPUT_PORTS_COUNT];
+    SemaphoreHandle_t ports[MODBUS_PARAMS_DISCRETE_INPUT_PORTS_COUNT];
 } discrete_input_reg_params_mutexes_t;
 
 input_reg_params_t         input_reg_params = {0};
@@ -142,6 +142,13 @@ static esp_err_t setup_reg_data(void)
         coil_params_mutexes.ports[coil_port_ind] = xSemaphoreCreateMutex();
         if (coil_params_mutexes.ports[coil_port_ind] == NULL) return ESP_FAIL;
     }
+    for (uint8_t discrete_port_ind = 0; discrete_port_ind < MODBUS_PARAMS_DISCRETE_INPUT_PORTS_COUNT;
+         discrete_port_ind++)
+    {
+        discrete_input_params.ports[discrete_port_ind] = 0x0;
+        discrete_input_params_mutexes.ports[discrete_port_ind] = xSemaphoreCreateMutex();
+        if (discrete_input_params_mutexes.ports[discrete_port_ind] == NULL) return ESP_FAIL;
+    }
     return ESP_OK;
 }
 
@@ -165,6 +172,7 @@ esp_err_t modbus_params_get_input_register_float_reg_area(ModbusParams_InReg_Flo
 {
     if (index >= MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT) return ESP_FAIL;
     if (reg_area == NULL) return ESP_FAIL;
+    if (input_reg_params_mutexes.floats[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_INPUT;
     reg_area->start_offset = (offsetof(input_reg_params_t, floats) + index * sizeof(float));
@@ -180,6 +188,7 @@ esp_err_t modbus_params_get_input_register_uint_reg_area(ModbusParams_InReg_UInt
 {
     if (index >= MODBUS_PARAMS_INPUT_REGISTER_UINT_COUNT) return ESP_FAIL;
     if (reg_area == NULL) return ESP_FAIL;
+    if (input_reg_params_mutexes.uints[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_INPUT;
     reg_area->start_offset = (offsetof(input_reg_params_t, uints) + index * sizeof(uint16_t));
@@ -195,6 +204,7 @@ esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_
 {
     if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT) return ESP_FAIL;
     if (reg_area == NULL) return ESP_FAIL;
+    if (holding_reg_params_mutexes.uints[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_HOLDING;
     reg_area->start_offset = (offsetof(holding_reg_params_t, uints) + index * sizeof(uint16_t));
@@ -210,6 +220,7 @@ esp_err_t modbus_params_get_holding_register_float_reg_area(ModbusParams_HoldReg
 {
     if (index >= MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT) return ESP_FAIL;
     if (reg_area == NULL) return ESP_FAIL;
+    if (holding_reg_params_mutexes.floats[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_HOLDING;
     reg_area->start_offset = (offsetof(holding_reg_params_t, floats) + index * sizeof(float));
@@ -224,6 +235,7 @@ esp_err_t modbus_params_get_coil_port_reg_area(uint8_t index, mb_register_area_d
 {
     if (index >= MODBUS_PARAMS_COIL_PORTS_COUNT) return ESP_FAIL;
     if (reg_area == NULL) return ESP_FAIL;
+    if (coil_params_mutexes.ports[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_COIL;
     reg_area->start_offset = (offsetof(coil_reg_params_t, ports) + index * sizeof(bool));
@@ -239,6 +251,7 @@ esp_err_t modbus_params_get_discrete_input_port_reg_area(ModbusParams_DiscreteIn
 {
     if (index >= MODBUS_PARAMS_DISCRETE_INPUT_COUNT) return ESP_FAIL;
     if (reg_area == NULL) return ESP_FAIL;
+    if (discrete_input_params_mutexes.ports[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_DISCRETE;
     reg_area->start_offset = (offsetof(discrete_input_reg_params_t, ports) + index * sizeof(bool));
@@ -252,6 +265,7 @@ esp_err_t modbus_params_get_discrete_input_port_reg_area(ModbusParams_DiscreteIn
 esp_err_t modbus_params_set_input_register_float(ModbusParams_InReg_Float_t index, float value)
 {
     if (index >= MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT) return ESP_FAIL;
+    if (input_reg_params_mutexes.floats[index] == NULL) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
     if (xSemaphoreTake(input_reg_params_mutexes.floats[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
@@ -272,6 +286,7 @@ esp_err_t modbus_params_set_input_register_float(ModbusParams_InReg_Float_t inde
 esp_err_t modbus_params_set_input_register_uint(ModbusParams_InReg_UInt_t index, uint16_t value)
 {
     if (index >= MODBUS_PARAMS_INPUT_REGISTER_UINT_COUNT) return ESP_FAIL;
+    if (input_reg_params_mutexes.uints[index] == NULL) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
     if (xSemaphoreTake(input_reg_params_mutexes.uints[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
@@ -292,6 +307,7 @@ esp_err_t modbus_params_set_input_register_uint(ModbusParams_InReg_UInt_t index,
 esp_err_t modbus_params_set_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t value)
 {
     if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT) return ESP_FAIL;
+    if (holding_reg_params_mutexes.uints[index] == NULL) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
     if (xSemaphoreTake(holding_reg_params_mutexes.uints[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS))
@@ -314,6 +330,7 @@ esp_err_t modbus_params_get_holding_register_uint(ModbusParams_HoldReg_UInt_t in
 {
     if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT) return ESP_FAIL;
     if (value == NULL) return ESP_FAIL;
+    if (holding_reg_params_mutexes.uints[index] == NULL) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
     if (xSemaphoreTake(holding_reg_params_mutexes.uints[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS))
@@ -335,6 +352,7 @@ esp_err_t modbus_params_get_holding_register_uint(ModbusParams_HoldReg_UInt_t in
 esp_err_t modbus_params_set_holding_register_float(ModbusParams_HoldReg_Float_t index, float value)
 {
     if (index >= MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT) return ESP_FAIL;
+    if (holding_reg_params_mutexes.floats[index] == NULL) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
     if (xSemaphoreTake(holding_reg_params_mutexes.floats[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS))
@@ -357,6 +375,7 @@ esp_err_t modbus_params_get_holding_register_float(ModbusParams_HoldReg_Float_t 
 {
     if (index >= MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT) return ESP_FAIL;
     if (value == NULL) return ESP_FAIL;
+    if (holding_reg_params_mutexes.floats[index] == NULL) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
     if (xSemaphoreTake(holding_reg_params_mutexes.floats[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS))
@@ -382,6 +401,8 @@ esp_err_t modbus_params_set_coil_state(ModbusParams_Coil_t index, bool state)
     uint8_t port_index = (uint8_t)(index / 8);
     uint8_t port_offset = (uint8_t)(index % 8);
 
+    if (coil_params_mutexes.ports[port_index] == NULL) return ESP_FAIL;
+
     esp_err_t ret = ESP_OK;
     if (xSemaphoreTake(coil_params_mutexes.ports[port_index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
         return ESP_FAIL;
@@ -406,6 +427,8 @@ esp_err_t modbus_params_get_coil_state(ModbusParams_Coil_t index, bool *const st
     uint8_t port_index = (uint8_t)(index / 8);
     uint8_t port_offset = (uint8_t)(index % 8);
 
+    if (coil_params_mutexes.ports[port_index] == NULL) return ESP_FAIL;
+
     esp_err_t ret = ESP_OK;
     if (xSemaphoreTake(coil_params_mutexes.ports[port_index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
         return ESP_FAIL;
@@ -428,6 +451,8 @@ esp_err_t modbus_params_set_discrete_input_state(ModbusParams_DiscreteInput_t in
 
     uint8_t port_index = (uint8_t)(index / 8);
     uint8_t port_offset = (uint8_t)(index % 8);
+
+    if (discrete_input_params_mutexes.ports[port_index] == NULL) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
     if (xSemaphoreTake(discrete_input_params_mutexes.ports[port_index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS))
