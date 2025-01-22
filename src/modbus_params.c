@@ -174,9 +174,9 @@ esp_err_t modbus_params_get_input_register_float_reg_area(ModbusParams_InReg_Flo
     if (input_reg_params_mutexes.floats[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_INPUT;
-    reg_area->start_offset = (offsetof(input_reg_params_t, floats) + index * sizeof(float));
+    reg_area->start_offset = (offsetof(input_reg_params_t, floats) + index * (sizeof(float) << 1));
     reg_area->address = (void *)&input_reg_params.floats[index];
-    reg_area->size = sizeof(float);
+    reg_area->size = (sizeof(float) << 1);
     reg_area->access = MB_ACCESS_RO;
 
     return ESP_OK;
@@ -190,26 +190,10 @@ esp_err_t modbus_params_get_input_register_uint_reg_area(ModbusParams_InReg_UInt
     if (input_reg_params_mutexes.uints[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_INPUT;
-    reg_area->start_offset = (offsetof(input_reg_params_t, uints) + index * sizeof(uint16_t));
+    reg_area->start_offset = (offsetof(input_reg_params_t, uints) + index * (sizeof(uint16_t) << 1));
     reg_area->address = (void *)&input_reg_params.uints[index];
-    reg_area->size = sizeof(uint16_t);
+    reg_area->size = (sizeof(uint16_t) << 1);
     reg_area->access = MB_ACCESS_RO;
-
-    return ESP_OK;
-}
-
-esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t          index,
-                                                           mb_register_area_descriptor_t *const reg_area)
-{
-    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT) return ESP_FAIL;
-    if (reg_area == NULL) return ESP_FAIL;
-    if (holding_reg_params_mutexes.uints[index] == NULL) return ESP_FAIL;
-
-    reg_area->type = MB_PARAM_HOLDING;
-    reg_area->start_offset = (offsetof(holding_reg_params_t, uints) + index * sizeof(uint16_t));
-    reg_area->address = (void *)&holding_reg_params.uints[index];
-    reg_area->size = sizeof(uint16_t);
-    reg_area->access = MB_ACCESS_RW;
 
     return ESP_OK;
 }
@@ -222,9 +206,25 @@ esp_err_t modbus_params_get_holding_register_float_reg_area(ModbusParams_HoldReg
     if (holding_reg_params_mutexes.floats[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_HOLDING;
-    reg_area->start_offset = (offsetof(holding_reg_params_t, floats) + index * sizeof(float));
+    reg_area->start_offset = (offsetof(holding_reg_params_t, floats) + index * (sizeof(float) << 1));
     reg_area->address = (void *)&holding_reg_params.floats[index];
-    reg_area->size = sizeof(float);
+    reg_area->size = (sizeof(float) << 1);
+    reg_area->access = MB_ACCESS_RW;
+
+    return ESP_OK;
+}
+
+esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t          index,
+                                                           mb_register_area_descriptor_t *const reg_area)
+{
+    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT) return ESP_FAIL;
+    if (reg_area == NULL) return ESP_FAIL;
+    if (holding_reg_params_mutexes.uints[index] == NULL) return ESP_FAIL;
+
+    reg_area->type = MB_PARAM_HOLDING;
+    reg_area->start_offset = (offsetof(holding_reg_params_t, uints) + index * (sizeof(uint16_t) << 1));
+    reg_area->address = (void *)&holding_reg_params.uints[index];
+    reg_area->size = (sizeof(uint16_t) << 1);
     reg_area->access = MB_ACCESS_RW;
 
     return ESP_OK;
@@ -237,9 +237,9 @@ esp_err_t modbus_params_get_coil_port_reg_area(uint8_t index, mb_register_area_d
     if (coil_params_mutexes.ports[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_COIL;
-    reg_area->start_offset = (offsetof(coil_reg_params_t, ports) + index * sizeof(bool));
+    reg_area->start_offset = (offsetof(coil_reg_params_t, ports) + index * (sizeof(bool) << 1));
     reg_area->address = (void *)&coil_params.ports[index];
-    reg_area->size = sizeof(bool);
+    reg_area->size = (sizeof(bool) << 1);
     reg_area->access = MB_ACCESS_RW;
 
     return ESP_OK;
@@ -253,9 +253,9 @@ esp_err_t modbus_params_get_discrete_input_port_reg_area(ModbusParams_DiscreteIn
     if (discrete_input_params_mutexes.ports[index] == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_DISCRETE;
-    reg_area->start_offset = (offsetof(discrete_input_reg_params_t, ports) + index * sizeof(bool));
+    reg_area->start_offset = (offsetof(discrete_input_reg_params_t, ports) + index * (sizeof(bool) << 1));
     reg_area->address = (void *)&discrete_input_params.ports[index];
-    reg_area->size = sizeof(bool);
+    reg_area->size = (sizeof(bool) << 1);
     reg_area->access = MB_ACCESS_RO;
 
     return ESP_OK;
