@@ -54,9 +54,12 @@ typedef enum
 
 esp_err_t modbus_params_init(void *slave_handler);
 
-esp_err_t modbus_params_get_input_register_float_reg_area(ModbusParams_InReg_Float_t index, mb_register_area_descriptor_t *const reg_area);
-esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t index, mb_register_area_descriptor_t *const reg_area);
-esp_err_t modbus_params_get_holding_register_float_reg_area(ModbusParams_HoldReg_Float_t index, mb_register_area_descriptor_t *const reg_area);
+esp_err_t modbus_params_get_input_register_float_reg_area(ModbusParams_InReg_Float_t           index,
+                                                          mb_register_area_descriptor_t *const reg_area);
+esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t          index,
+                                                           mb_register_area_descriptor_t *const reg_area);
+esp_err_t modbus_params_get_holding_register_float_reg_area(ModbusParams_HoldReg_Float_t         index,
+                                                            mb_register_area_descriptor_t *const reg_area);
 esp_err_t modbus_params_get_coil_port_reg_area(uint8_t index, mb_register_area_descriptor_t *const reg_area);
 
 esp_err_t modbus_params_set_input_register_float(ModbusParams_InReg_Float_t index, float value);

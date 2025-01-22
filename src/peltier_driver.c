@@ -1,8 +1,8 @@
 #include "peltier_driver.h"
 
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "freertos/semphr.h"
+#include "freertos/task.h"
 
 #include "driver/gpio.h"
 #include "esp_log.h"
@@ -12,11 +12,11 @@
 static const char *LOG_TAG = "peltier_driver";
 
 #define PELTIER_HIGH_SIDE_RELAY_OUTPUT (gpio_num_t)3 // XIAO ESP32S3 A2
-#define PELTIER_LOW_SIDE_RELAY_OUTPUT (gpio_num_t)2  // XIAO ESP32S3 A1
+#define PELTIER_LOW_SIDE_RELAY_OUTPUT  (gpio_num_t)2 // XIAO ESP32S3 A1
 
-#define PELTIER_TOGGLING_DELAY_MS 10
+#define PELTIER_TOGGLING_DELAY_MS      10
 
-#define PELTIER_MUTEX_TIMEOUT_MS 10U
+#define PELTIER_MUTEX_TIMEOUT_MS       10U
 
 static PeltierDriver_Command_t s_current_command = PELTIER_DRIVER_COMMAND_NONE;
 static PeltierDriver_Command_t s_requested_command = PELTIER_DRIVER_COMMAND_NONE;
@@ -26,7 +26,8 @@ static SemaphoreHandle_t s_requested_command_mutex = NULL;
 
 static inline bool command_invalid(PeltierDriver_Command_t command)
 {
-    return command != PELTIER_DRIVER_COMMAND_NONE && command != PELTIER_DRIVER_COMMAND_COOL && command != PELTIER_DRIVER_COMMAND_HEAT;
+    return command != PELTIER_DRIVER_COMMAND_NONE && command != PELTIER_DRIVER_COMMAND_COOL
+           && command != PELTIER_DRIVER_COMMAND_HEAT;
 }
 
 static esp_err_t set_current_command(PeltierDriver_Command_t command)
@@ -83,7 +84,7 @@ static esp_err_t enact_command(PeltierDriver_Command_t command)
         return ESP_FAIL;
     }
     PeltierDriver_Command_t current_command = command;
-    esp_err_t ret = peltier_driver_get_current_command(&current_command);
+    esp_err_t               ret = peltier_driver_get_current_command(&current_command);
     if (command == current_command)
     {
         return ESP_OK;
@@ -199,22 +200,22 @@ void peltier_driver_task(void *pvParameter)
     {
         // Check if peltier override is requested by modbus master
         static bool last_peltier_override_state = false;
-        bool peltier_override_requested = false;
-        esp_err_t ret_override = modbus_params_get_coil_state(ENABLE_PELTIER_OVERRIDE, &peltier_override_requested);
+        bool        peltier_override_requested = false;
+        esp_err_t   ret_override = modbus_params_get_coil_state(ENABLE_PELTIER_OVERRIDE, &peltier_override_requested);
         if (ret_override != ESP_OK)
         {
             ESP_LOGE(LOG_TAG, "Failed to get modbus parameter ENABLE_PELTIER_OVERRIDE!");
         }
         static bool last_cooling_override_state = false;
-        bool cooling_override_state = false;
-        esp_err_t ret_high = modbus_params_get_coil_state(OVERRIDE_PELTIER_COOLING, &cooling_override_state);
+        bool        cooling_override_state = false;
+        esp_err_t   ret_high = modbus_params_get_coil_state(OVERRIDE_PELTIER_COOLING, &cooling_override_state);
         if (ret_high != ESP_OK)
         {
             ESP_LOGE(LOG_TAG, "Failed to get modbus parameter OVERRIDE_PELTIER_COOLING!");
         }
         static bool last_heating_override_state = false;
-        bool heating_override_state = false;
-        esp_err_t ret_low = modbus_params_get_coil_state(OVERRIDE_PELTIER_HEATING, &heating_override_state);
+        bool        heating_override_state = false;
+        esp_err_t   ret_low = modbus_params_get_coil_state(OVERRIDE_PELTIER_HEATING, &heating_override_state);
         if (ret_low != ESP_OK)
         {
             ESP_LOGE(LOG_TAG, "Failed to get modbus parameter OVERRIDE_PELTIER_HEATING!");
@@ -227,7 +228,8 @@ void peltier_driver_task(void *pvParameter)
                 ESP_LOGI(LOG_TAG, "Peltier override requested!");
                 last_peltier_override_state = true;
             }
-            if (last_cooling_override_state != cooling_override_state || last_heating_override_state != heating_override_state)
+            if (last_cooling_override_state != cooling_override_state
+                || last_heating_override_state != heating_override_state)
             {
                 last_cooling_override_state = cooling_override_state;
                 last_heating_override_state = heating_override_state;
@@ -262,7 +264,7 @@ void peltier_driver_task(void *pvParameter)
             }
 
             PeltierDriver_Command_t requested_command = PELTIER_DRIVER_COMMAND_NONE;
-            esp_err_t ret = get_requested_command(&requested_command);
+            esp_err_t               ret = get_requested_command(&requested_command);
             if (ret == ESP_OK)
             {
                 ret = enact_command(requested_command);

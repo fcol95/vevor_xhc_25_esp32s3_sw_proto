@@ -12,7 +12,7 @@ typedef enum
 } PeltierDriver_Command_t;
 
 esp_err_t peltier_driver_init(void);
-void peltier_driver_task(void *pvParameter);
+void      peltier_driver_task(void *pvParameter);
 
 esp_err_t peltier_driver_set_requested_command(PeltierDriver_Command_t command);
 esp_err_t peltier_driver_get_current_command(PeltierDriver_Command_t *const command);

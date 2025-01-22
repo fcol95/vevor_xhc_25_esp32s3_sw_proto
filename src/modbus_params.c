@@ -33,7 +33,7 @@ typedef struct
 typedef struct
 {
     uint16_t uints[MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT];
-    float floats[MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT];
+    float    floats[MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT];
 } holding_reg_params_t;
 #pragma pack(pop)
 typedef struct
@@ -45,7 +45,8 @@ typedef struct
 #pragma pack(push, 1)
 typedef struct
 {
-    bool ports[MODBUS_PARAMS_COIL_PORTS_COUNT]; // TODO: Optimize this to not use a full byte per coil, do a bitfield with ports?
+    bool ports[MODBUS_PARAMS_COIL_PORTS_COUNT]; // TODO: Optimize this to not use a full byte per coil, do a bitfield
+                                                // with ports?
 } coil_reg_params_t;
 #pragma pack(pop)
 typedef struct
@@ -53,13 +54,13 @@ typedef struct
     QueueHandle_t ports[MODBUS_PARAMS_COIL_PORTS_COUNT];
 } coil_reg_params_mutexes_t;
 
-input_reg_params_t input_reg_params = {0};
+input_reg_params_t         input_reg_params = {0};
 input_reg_params_mutexes_t input_reg_params_mutexes = {0};
 
-holding_reg_params_t holding_reg_params = {0};
+holding_reg_params_t         holding_reg_params = {0};
 holding_reg_params_mutexes_t holding_reg_params_mutexes = {0};
 
-coil_reg_params_t coil_params = {0};
+coil_reg_params_t         coil_params = {0};
 coil_reg_params_mutexes_t coil_params_mutexes = {0};
 
 // TODO: Add logic to have min/max values for parameters
@@ -87,33 +88,35 @@ static inline uint32_t set_bit(uint32_t in, bool bit_value, uint8_t bit_index)
 static esp_err_t setup_reg_data(void)
 {
     // Define initial state of parameters
-    for (ModbusParams_InReg_Float_t float_ind = (ModbusParams_InReg_Float_t)0; float_ind < MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT; float_ind++)
+    for (ModbusParams_InReg_Float_t float_ind = (ModbusParams_InReg_Float_t)0;
+         float_ind < MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT;
+         float_ind++)
     {
         input_reg_params.floats[float_ind] = NAN;
         input_reg_params_mutexes.floats[float_ind] = xSemaphoreCreateMutex();
-        if (input_reg_params_mutexes.floats[float_ind] == NULL)
-            return ESP_FAIL;
+        if (input_reg_params_mutexes.floats[float_ind] == NULL) return ESP_FAIL;
     }
-    for (ModbusParams_HoldReg_UInt_t uint_ind = (ModbusParams_HoldReg_UInt_t)0; uint_ind < MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT; uint_ind++)
+    for (ModbusParams_HoldReg_UInt_t uint_ind = (ModbusParams_HoldReg_UInt_t)0;
+         uint_ind < MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT;
+         uint_ind++)
     {
         holding_reg_params.uints[uint_ind] = 0x0;
         holding_reg_params_mutexes.uints[uint_ind] = xSemaphoreCreateMutex();
-        if (holding_reg_params_mutexes.uints[uint_ind] == NULL)
-            return ESP_FAIL;
+        if (holding_reg_params_mutexes.uints[uint_ind] == NULL) return ESP_FAIL;
     }
-    for (ModbusParams_HoldReg_Float_t float_ind = (ModbusParams_HoldReg_Float_t)0; float_ind < MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT; float_ind++)
+    for (ModbusParams_HoldReg_Float_t float_ind = (ModbusParams_HoldReg_Float_t)0;
+         float_ind < MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT;
+         float_ind++)
     {
         holding_reg_params.floats[float_ind] = NAN;
         holding_reg_params_mutexes.floats[float_ind] = xSemaphoreCreateMutex();
-        if (holding_reg_params_mutexes.floats[float_ind] == NULL)
-            return ESP_FAIL;
+        if (holding_reg_params_mutexes.floats[float_ind] == NULL) return ESP_FAIL;
     }
     for (uint8_t coil_port_ind = 0; coil_port_ind < MODBUS_PARAMS_COIL_PORTS_COUNT; coil_port_ind++)
     {
         coil_params.ports[coil_port_ind] = 0x0;
         coil_params_mutexes.ports[coil_port_ind] = xSemaphoreCreateMutex();
-        if (coil_params_mutexes.ports[coil_port_ind] == NULL)
-            return ESP_FAIL;
+        if (coil_params_mutexes.ports[coil_port_ind] == NULL) return ESP_FAIL;
     }
     return ESP_OK;
 }
@@ -122,8 +125,7 @@ void *slave_handler_ctx = NULL;
 
 esp_err_t modbus_params_init(void *slave_handler)
 {
-    if (slave_handler == NULL)
-        return ESP_FAIL;
+    if (slave_handler == NULL) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
 
@@ -134,12 +136,11 @@ esp_err_t modbus_params_init(void *slave_handler)
     return ret;
 }
 
-esp_err_t modbus_params_get_input_register_float_reg_area(ModbusParams_InReg_Float_t index, mb_register_area_descriptor_t *const reg_area)
+esp_err_t modbus_params_get_input_register_float_reg_area(ModbusParams_InReg_Float_t           index,
+                                                          mb_register_area_descriptor_t *const reg_area)
 {
-    if (index >= MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT)
-        return ESP_FAIL;
-    if (reg_area == NULL)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT) return ESP_FAIL;
+    if (reg_area == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_INPUT;
     reg_area->start_offset = (offsetof(input_reg_params_t, floats) + index * sizeof(float));
@@ -150,12 +151,11 @@ esp_err_t modbus_params_get_input_register_float_reg_area(ModbusParams_InReg_Flo
     return ESP_OK;
 }
 
-esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t index, mb_register_area_descriptor_t *const reg_area)
+esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_UInt_t          index,
+                                                           mb_register_area_descriptor_t *const reg_area)
 {
-    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT)
-        return ESP_FAIL;
-    if (reg_area == NULL)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT) return ESP_FAIL;
+    if (reg_area == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_HOLDING;
     reg_area->start_offset = (offsetof(holding_reg_params_t, uints) + index * sizeof(uint16_t));
@@ -166,12 +166,11 @@ esp_err_t modbus_params_get_holding_register_uint_reg_area(ModbusParams_HoldReg_
     return ESP_OK;
 }
 
-esp_err_t modbus_params_get_holding_register_float_reg_area(ModbusParams_HoldReg_Float_t index, mb_register_area_descriptor_t *const reg_area)
+esp_err_t modbus_params_get_holding_register_float_reg_area(ModbusParams_HoldReg_Float_t         index,
+                                                            mb_register_area_descriptor_t *const reg_area)
 {
-    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT)
-        return ESP_FAIL;
-    if (reg_area == NULL)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT) return ESP_FAIL;
+    if (reg_area == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_HOLDING;
     reg_area->start_offset = (offsetof(holding_reg_params_t, floats) + index * sizeof(float));
@@ -184,10 +183,8 @@ esp_err_t modbus_params_get_holding_register_float_reg_area(ModbusParams_HoldReg
 
 esp_err_t modbus_params_get_coil_port_reg_area(uint8_t index, mb_register_area_descriptor_t *const reg_area)
 {
-    if (index >= MODBUS_PARAMS_COIL_PORTS_COUNT)
-        return ESP_FAIL;
-    if (reg_area == NULL)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_COIL_PORTS_COUNT) return ESP_FAIL;
+    if (reg_area == NULL) return ESP_FAIL;
 
     reg_area->type = MB_PARAM_COIL;
     reg_area->start_offset = (offsetof(coil_reg_params_t, ports) + index * sizeof(bool));
@@ -200,8 +197,7 @@ esp_err_t modbus_params_get_coil_port_reg_area(uint8_t index, mb_register_area_d
 
 esp_err_t modbus_params_set_input_register_float(ModbusParams_InReg_Float_t index, float value)
 {
-    if (index >= MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
     if (xSemaphoreTake(input_reg_params_mutexes.floats[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
@@ -215,18 +211,17 @@ esp_err_t modbus_params_set_input_register_float(ModbusParams_InReg_Float_t inde
     input_reg_params.floats[index] = value;
     ret = mbc_slave_unlock(slave_handler_ctx);
     xSemaphoreGive(input_reg_params_mutexes.floats[index]);
-    if (ret != ESP_OK)
-        return ret;
+    if (ret != ESP_OK) return ret;
     return ESP_OK;
 }
 
 esp_err_t modbus_params_set_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t value)
 {
-    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
-    if (xSemaphoreTake(holding_reg_params_mutexes.uints[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
+    if (xSemaphoreTake(holding_reg_params_mutexes.uints[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS))
+        != pdTRUE)
         return ESP_FAIL;
     ret = mbc_slave_lock(slave_handler_ctx);
     if (ret != ESP_OK)
@@ -237,20 +232,18 @@ esp_err_t modbus_params_set_holding_register_uint(ModbusParams_HoldReg_UInt_t in
     holding_reg_params.uints[index] = value;
     ret = mbc_slave_unlock(slave_handler_ctx);
     xSemaphoreGive(holding_reg_params_mutexes.uints[index]);
-    if (ret != ESP_OK)
-        return ret;
+    if (ret != ESP_OK) return ret;
     return ESP_OK;
 }
 
 esp_err_t modbus_params_get_holding_register_uint(ModbusParams_HoldReg_UInt_t index, uint16_t *const value)
 {
-    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT)
-        return ESP_FAIL;
-    if (value == NULL)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT) return ESP_FAIL;
+    if (value == NULL) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
-    if (xSemaphoreTake(holding_reg_params_mutexes.uints[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
+    if (xSemaphoreTake(holding_reg_params_mutexes.uints[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS))
+        != pdTRUE)
         return ESP_FAIL;
     ret = mbc_slave_lock(slave_handler_ctx);
     if (ret != ESP_OK)
@@ -261,18 +254,17 @@ esp_err_t modbus_params_get_holding_register_uint(ModbusParams_HoldReg_UInt_t in
     *value = holding_reg_params.uints[index];
     ret = mbc_slave_unlock(slave_handler_ctx);
     xSemaphoreGive(holding_reg_params_mutexes.uints[index]);
-    if (ret != ESP_OK)
-        return ret;
+    if (ret != ESP_OK) return ret;
     return ESP_OK;
 }
 
 esp_err_t modbus_params_set_holding_register_float(ModbusParams_HoldReg_Float_t index, float value)
 {
-    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
-    if (xSemaphoreTake(holding_reg_params_mutexes.floats[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
+    if (xSemaphoreTake(holding_reg_params_mutexes.floats[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS))
+        != pdTRUE)
         return ESP_FAIL;
     ret = mbc_slave_lock(slave_handler_ctx);
     if (ret != ESP_OK)
@@ -283,20 +275,18 @@ esp_err_t modbus_params_set_holding_register_float(ModbusParams_HoldReg_Float_t 
     holding_reg_params.floats[index] = value;
     ret = mbc_slave_unlock(slave_handler_ctx);
     xSemaphoreGive(holding_reg_params_mutexes.floats[index]);
-    if (ret != ESP_OK)
-        return ret;
+    if (ret != ESP_OK) return ret;
     return ESP_OK;
 }
 
 esp_err_t modbus_params_get_holding_register_float(ModbusParams_HoldReg_Float_t index, float *const value)
 {
-    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT)
-        return ESP_FAIL;
-    if (value == NULL)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT) return ESP_FAIL;
+    if (value == NULL) return ESP_FAIL;
 
     esp_err_t ret = ESP_OK;
-    if (xSemaphoreTake(holding_reg_params_mutexes.floats[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS)) != pdTRUE)
+    if (xSemaphoreTake(holding_reg_params_mutexes.floats[index], pdMS_TO_TICKS(MODBUS_PARAMS_MUTEX_TIMEOUT_MS))
+        != pdTRUE)
         return ESP_FAIL;
     ret = mbc_slave_lock(slave_handler_ctx);
     if (ret != ESP_OK)
@@ -307,15 +297,13 @@ esp_err_t modbus_params_get_holding_register_float(ModbusParams_HoldReg_Float_t 
     *value = holding_reg_params.floats[index];
     ret = mbc_slave_unlock(slave_handler_ctx);
     xSemaphoreGive(holding_reg_params_mutexes.floats[index]);
-    if (ret != ESP_OK)
-        return ret;
+    if (ret != ESP_OK) return ret;
     return ESP_OK;
 }
 
 esp_err_t modbus_params_set_coil_state(ModbusParams_Coil_t index, bool state)
 {
-    if (index >= MODBUS_PARAMS_COIL_COUNT)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_COIL_COUNT) return ESP_FAIL;
 
     uint8_t port_index = (uint8_t)(index / 8);
     uint8_t port_offset = (uint8_t)(index % 8);
@@ -332,17 +320,14 @@ esp_err_t modbus_params_set_coil_state(ModbusParams_Coil_t index, bool state)
     coil_params.ports[port_index] = set_bit(coil_params.ports[port_index], state, port_offset);
     ret = mbc_slave_unlock(slave_handler_ctx);
     xSemaphoreGive(coil_params_mutexes.ports[port_index]);
-    if (ret != ESP_OK)
-        return ret;
+    if (ret != ESP_OK) return ret;
     return ESP_OK;
 }
 
 esp_err_t modbus_params_get_coil_state(ModbusParams_Coil_t index, bool *const state)
 {
-    if (index >= MODBUS_PARAMS_COIL_COUNT)
-        return ESP_FAIL;
-    if (state == NULL)
-        return ESP_FAIL;
+    if (index >= MODBUS_PARAMS_COIL_COUNT) return ESP_FAIL;
+    if (state == NULL) return ESP_FAIL;
 
     uint8_t port_index = (uint8_t)(index / 8);
     uint8_t port_offset = (uint8_t)(index % 8);
@@ -359,7 +344,6 @@ esp_err_t modbus_params_get_coil_state(ModbusParams_Coil_t index, bool *const st
     *state = get_bit(coil_params.ports[port_index], port_offset);
     ret = mbc_slave_unlock(slave_handler_ctx);
     xSemaphoreGive(coil_params_mutexes.ports[port_index]);
-    if (ret != ESP_OK)
-        return ret;
+    if (ret != ESP_OK) return ret;
     return ESP_OK;
 }

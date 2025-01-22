@@ -11,17 +11,17 @@
 #include "esp_flash.h"
 #include "esp_log.h"
 
-#include "temp_sense.h"
-#include "peltier_driver.h"
 #include "modbus_server.h"
+#include "peltier_driver.h"
 #include "temp_control.h"
+#include "temp_sense.h"
 
 static const char *LOG_TAG = "main";
 
 #ifdef CONFIG_BLINK_GPIO
-#define BLINK_GPIO (gpio_num_t) CONFIG_BLINK_GPIO
+    #define BLINK_GPIO (gpio_num_t) CONFIG_BLINK_GPIO
 #else
-#define BLINK_GPIO (gpio_num_t)21 // LED_BUILT_IN
+    #define BLINK_GPIO (gpio_num_t)21 // LED_BUILT_IN
 #endif
 
 void blink_task(void *pvParameter)
@@ -43,9 +43,10 @@ void print_board_info(void)
 {
     /* Print chip information */
     esp_chip_info_t chip_info;
-    uint32_t flash_size;
+    uint32_t        flash_size;
     esp_chip_info(&chip_info);
-    ESP_LOGI(LOG_TAG, "  This is %s chip with %d CPU core(s), WiFi%s%s, ",
+    ESP_LOGI(LOG_TAG,
+             "  This is %s chip with %d CPU core(s), WiFi%s%s, ",
              CONFIG_IDF_TARGET,
              chip_info.cores,
              (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
@@ -60,7 +61,9 @@ void print_board_info(void)
         return;
     }
 
-    ESP_LOGI(LOG_TAG, "%ldMB %s flash", flash_size / (1024 * 1024),
+    ESP_LOGI(LOG_TAG,
+             "%ldMB %s flash",
+             flash_size / (1024 * 1024),
              (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 
     ESP_LOGI(LOG_TAG, "Minimum free heap size: %ld bytes", esp_get_minimum_free_heap_size());
