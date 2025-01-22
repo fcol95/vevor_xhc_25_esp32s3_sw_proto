@@ -15,9 +15,12 @@ static const char *LOG_TAG = "temp_control";
 
 #define TEMP_CONTROLLER_SENSE_ABORT_MAX_TEMP_DEGC                (TEMP_CONTROLLER_REQUEST_MAX_TEMP_DEGC + 5.0f)
 #define TEMP_CONTROLLER_SENSE_ABORT_MIN_TEMP_DEGC                (TEMP_CONTROLLER_REQUEST_MIN_TEMP_DEGC - 5.0f)
-#define TEMP_CONTROLLER_HYSTERESIS_DEGC                          0.5f
+#define TEMP_CONTROLLER_ACTIVATION_HYSTERESIS_DEGC               (TEMP_CONTROLLER_DEACTIVATION_HYSTERESIS_DEGC * 2.0f)
+#define TEMP_CONTROLLER_DEACTIVATION_HYSTERESIS_DEGC             0.25f
 #define TEMP_CONTROLLER_MINIMUM_ELAPSED_TIME_BETWEEN_COMMANDS_MS 2000U
 
+static_assert(TEMP_CONTROLLER_ACTIVATION_HYSTERESIS_DEGC > TEMP_CONTROLLER_DEACTIVATION_HYSTERESIS_DEGC,
+              "Activation hysteresis must be greater than deactivation!");
 static_assert(TEMP_CONTROLLER_REQUEST_MAX_TEMP_DEGC > TEMP_CONTROLLER_REQUEST_MIN_TEMP_DEGC,
               "Requested max temperature must be greater than min temperature!");
 static_assert(TEMP_CONTROLLER_SENSE_ABORT_MAX_TEMP_DEGC > TEMP_CONTROLLER_SENSE_ABORT_MIN_TEMP_DEGC,
@@ -79,7 +82,8 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
     }
 
     float delta_temp_degc = requested_temp_degc - actual_temp_degc;
-    if (delta_temp_degc >= TEMP_CONTROLLER_HYSTERESIS_DEGC)
+    if (s_last_known_peltier_command == PELTIER_DRIVER_COMMAND_NONE
+        && delta_temp_degc >= TEMP_CONTROLLER_ACTIVATION_HYSTERESIS_DEGC)
     {
         if ((first_run
              || get_elapsed_time_ms(last_command_change_time_ms)
@@ -102,7 +106,8 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
                      delta_temp_degc);
         }
     }
-    else if (delta_temp_degc <= -TEMP_CONTROLLER_HYSTERESIS_DEGC)
+    else if (s_last_known_peltier_command == PELTIER_DRIVER_COMMAND_NONE
+             && delta_temp_degc <= -TEMP_CONTROLLER_ACTIVATION_HYSTERESIS_DEGC)
     {
         if ((first_run
              || get_elapsed_time_ms(last_command_change_time_ms)
@@ -126,9 +131,9 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
         }
     }
     else if ((s_last_known_peltier_command == PELTIER_DRIVER_COMMAND_COOL
-              && delta_temp_degc >= TEMP_CONTROLLER_HYSTERESIS_DEGC)
+              && delta_temp_degc >= TEMP_CONTROLLER_DEACTIVATION_HYSTERESIS_DEGC)
              || (s_last_known_peltier_command == PELTIER_DRIVER_COMMAND_HEAT
-                 && delta_temp_degc <= -TEMP_CONTROLLER_HYSTERESIS_DEGC))
+                 && delta_temp_degc <= -TEMP_CONTROLLER_DEACTIVATION_HYSTERESIS_DEGC))
     {
         if ((first_run
              || (get_elapsed_time_ms(last_command_change_time_ms)
