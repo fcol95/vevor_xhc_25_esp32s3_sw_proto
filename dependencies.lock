@@ -5,6 +5,12 @@ dependencies:
       service_url: https://api.components.espressif.com/
       type: service
     version: 0.5.3
+  espressif/esp-dsp:
+    component_hash: fa7fe74305df6da25867437ebcd4213e047cbfc0556cf92067ab657fce537c6e
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.5.2
   espressif/esp-modbus:
     component_hash: 1c3be72a0b5384929901a737860463c04e3393913d0e1bf2588ca980cbe675e3
     source:
@@ -34,6 +40,6 @@ dependencies:
       path: C:\Users\felix\.platformio\packages\framework-espidf\examples\common_components\protocol_examples_common
       type: local
     version: '*'
-manifest_hash: d08103dc606382a85745feb46ad279ee89bfd519790e39fc9a050d9fea2e833d
+manifest_hash: 5b6030cfdf0fedb9ae2bfff8e70c7c4793b659b0e38f21a4b54520c6d568cfd8
 target: esp32s3
 version: 1.0.0

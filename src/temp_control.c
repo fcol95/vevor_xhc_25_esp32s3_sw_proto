@@ -111,7 +111,7 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
             ESP_LOGI(LOG_TAG, "Requested temperature delta below hysteresis (%.2fdegC), starting to cool...", delta_temp_degc);
         }
     }
-    else if (delta_temp_degc <= TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC && delta_temp_degc >= -TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC)
+    else if ((s_last_known_peltier_command == PELTIER_DRIVER_COMMAND_COOL && delta_temp_degc >= TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC) || (s_last_known_peltier_command == PELTIER_DRIVER_COMMAND_HEAT && delta_temp_degc <= -TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC))
     {
         if ((first_run || (get_elapsed_time_ms(last_command_change_time_ms) > TEMP_CONTROLLER_MINIMUM_ELAPSED_TIME_BETWEEN_COMMANDS_MS)) && (s_last_known_peltier_command != PELTIER_DRIVER_COMMAND_NONE || s_last_known_peltier_command != current_command))
         {

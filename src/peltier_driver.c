@@ -21,8 +21,8 @@ static const char *LOG_TAG = "peltier_driver";
 static PeltierDriver_Command_t s_current_command = PELTIER_DRIVER_COMMAND_NONE;
 static PeltierDriver_Command_t s_requested_command = PELTIER_DRIVER_COMMAND_NONE;
 
-static SemaphoreHandle_t s_current_command_mutex;
-static SemaphoreHandle_t s_requested_command_mutex;
+static SemaphoreHandle_t s_current_command_mutex = NULL;
+static SemaphoreHandle_t s_requested_command_mutex = NULL;
 
 static inline bool command_invalid(PeltierDriver_Command_t command)
 {
