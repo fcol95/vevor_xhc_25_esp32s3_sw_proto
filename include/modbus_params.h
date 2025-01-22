@@ -38,7 +38,10 @@ typedef enum
 {
     TEMP_SENSE_PERIOD_MS = 0,
     MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT,
+    // TODO: Add a peltier driver state (off/heating/cooling)
 } ModbusParams_HoldReg_UInt_t;
+
+// TODO: Add discrete inputs, feedback on enabled
 
 typedef enum
 {

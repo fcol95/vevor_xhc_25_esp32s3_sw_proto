@@ -9,6 +9,9 @@
 
 #include "modbus_params.h" // Move management of get/set params to "modbus_master" code?
 
+// TODO: Add peltier module failure dectection (rate of change of temperature vs state, detection of flipped high/low
+// side, etc.)
+
 static const char *LOG_TAG = "peltier_driver";
 
 #define PELTIER_HIGH_SIDE_RELAY_OUTPUT (gpio_num_t)3 // XIAO ESP32S3 A2
