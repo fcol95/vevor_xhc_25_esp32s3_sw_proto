@@ -16,7 +16,7 @@ static const char *LOG_TAG = "temp_control";
 #define TEMP_CONTROLLER_SENSE_ABORT_MAX_TEMP_DEGC (TEMP_CONTROLLER_REQUEST_MAX_TEMP_DEGC + 5.0f)
 #define TEMP_CONTROLLER_SENSE_ABORT_MIN_TEMP_DEGC (TEMP_CONTROLLER_REQUEST_MIN_TEMP_DEGC - 5.0f)
 #define TEMP_CONTROLLER_HYSTERESIS_ACTIVATION_DEGC (TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC * 2.0f)
-#define TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC 0.25f
+#define TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC 0.5f
 #define TEMP_CONTROLLER_MINIMUM_ELAPSED_TIME_BETWEEN_COMMANDS_MS 2000U
 
 static_assert(TEMP_CONTROLLER_HYSTERESIS_ACTIVATION_DEGC > TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC, "Hysteresis activation temperature must be greater than deactivation temperature!");
@@ -50,19 +50,19 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
     ret = temp_sense_get_last_measurement_temperature(&actual_temp_degc);
     if (ret != ESP_OK || !finitef(actual_temp_degc))
     {
-        ESP_LOGE(LOG_TAG, "Can't get a valid actual temperature measurement!");
+        ESP_LOGE(LOG_TAG, "Can't get a valid actual temperature measurement (%.2f)!", actual_temp_degc);
         return ret;
     }
 
     // Checking abort conditions
     if (requested_temp_degc > TEMP_CONTROLLER_REQUEST_MAX_TEMP_DEGC || requested_temp_degc < TEMP_CONTROLLER_REQUEST_MIN_TEMP_DEGC)
     {
-        ESP_LOGE(LOG_TAG, "Requested temperature out of bounds! Aborting temperature control!");
+        ESP_LOGE(LOG_TAG, "Requested temperature out of bounds (%.2fdegC)! Aborting temperature control!", requested_temp_degc);
         abort_control = true;
     }
     if (actual_temp_degc > TEMP_CONTROLLER_SENSE_ABORT_MAX_TEMP_DEGC || actual_temp_degc < TEMP_CONTROLLER_SENSE_ABORT_MIN_TEMP_DEGC)
     {
-        ESP_LOGE(LOG_TAG, "Actual temperature out of bounds! Aborting temperature control!");
+        ESP_LOGE(LOG_TAG, "Actual temperature out of bounds (%.2fdegC)! Aborting temperature control!", actual_temp_degc);
         abort_control = true;
     }
     // TODO: Replace bang-bang logic with PID controller!
@@ -90,7 +90,7 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
             last_command_change_time_ms = pdTICKS_TO_MS(xTaskGetTickCount());
             if (first_run)
                 first_run = false;
-            ESP_LOGI(LOG_TAG, "Requested temperature delta above hysteresis, starting to heat...");
+            ESP_LOGI(LOG_TAG, "Requested temperature delta above hysteresis (%.2fdegC), starting to heat...", delta_temp_degc);
         }
     }
     else if (delta_temp_degc <= -TEMP_CONTROLLER_HYSTERESIS_ACTIVATION_DEGC)
@@ -108,12 +108,12 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
             last_command_change_time_ms = pdTICKS_TO_MS(xTaskGetTickCount());
             if (first_run)
                 first_run = false;
-            ESP_LOGI(LOG_TAG, "Requested temperature delta below hysteresis, starting to cool...");
+            ESP_LOGI(LOG_TAG, "Requested temperature delta below hysteresis (%.2fdegC), starting to cool...", delta_temp_degc);
         }
     }
-    else if (abort_control || (delta_temp_degc <= TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC && delta_temp_degc >= -TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC))
+    else if (delta_temp_degc <= TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC && delta_temp_degc >= -TEMP_CONTROLLER_HYSTERESIS_DEACTIVATION_DEGC)
     {
-        if ((abort_control || first_run || (get_elapsed_time_ms(last_command_change_time_ms) > TEMP_CONTROLLER_MINIMUM_ELAPSED_TIME_BETWEEN_COMMANDS_MS)) && (s_last_known_peltier_command != PELTIER_DRIVER_COMMAND_NONE || s_last_known_peltier_command != current_command))
+        if ((first_run || (get_elapsed_time_ms(last_command_change_time_ms) > TEMP_CONTROLLER_MINIMUM_ELAPSED_TIME_BETWEEN_COMMANDS_MS)) && (s_last_known_peltier_command != PELTIER_DRIVER_COMMAND_NONE || s_last_known_peltier_command != current_command))
         {
             const PeltierDriver_Command_t new_command = PELTIER_DRIVER_COMMAND_NONE;
             ret = peltier_driver_set_requested_command(PELTIER_DRIVER_COMMAND_NONE);
@@ -126,7 +126,24 @@ esp_err_t temp_controller_execute(float requested_temp_degc)
             last_command_change_time_ms = pdTICKS_TO_MS(xTaskGetTickCount());
             if (first_run)
                 first_run = false;
-            ESP_LOGI(LOG_TAG, "Requested temperature delta within hysteresis, stopping peltier...");
+            ESP_LOGI(LOG_TAG, "Requested temperature delta within hysteresis (%.2f), stopping peltier...", delta_temp_degc);
+        }
+    }
+    else if (abort_control)
+    {
+        if (s_last_known_peltier_command != PELTIER_DRIVER_COMMAND_NONE || s_last_known_peltier_command != current_command)
+        {
+            const PeltierDriver_Command_t new_command = PELTIER_DRIVER_COMMAND_NONE;
+            ret = peltier_driver_set_requested_command(PELTIER_DRIVER_COMMAND_NONE);
+            if (ret != ESP_OK)
+            {
+                ESP_LOGE(LOG_TAG, "Abort true, but can't stop peltier!");
+                return ret;
+            }
+            s_last_known_peltier_command = new_command;
+            last_command_change_time_ms = pdTICKS_TO_MS(xTaskGetTickCount());
+            abort_control = false;
+            ESP_LOGI(LOG_TAG, "Aborting true, stopping peltier...");
         }
     }
     return ret;
@@ -175,6 +192,11 @@ void temp_control_task(void *pvParameter)
                 if (ret != ESP_OK)
                 {
                     ESP_LOGE(LOG_TAG, "Can't disable peltier module!");
+                }
+                else
+                {
+                    s_last_known_peltier_command = PELTIER_DRIVER_COMMAND_NONE;
+                    error_count = 0;
                 }
             }
             else
