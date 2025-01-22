@@ -31,15 +31,14 @@ typedef enum
 
 typedef enum
 {
-    TEMP_SENSE_PERIOD_MS = 0,
-    MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT,
-} ModbusParams_HoldReg_UInt_t;
-
-typedef enum
-{
     REQUESTED_TEMP_DEGC = 0,
     MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT,
 } ModbusParams_HoldReg_Float_t;
+typedef enum
+{
+    TEMP_SENSE_PERIOD_MS = 0,
+    MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT,
+} ModbusParams_HoldReg_UInt_t;
 
 typedef enum
 {

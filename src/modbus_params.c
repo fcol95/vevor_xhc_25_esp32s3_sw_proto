@@ -32,14 +32,14 @@ typedef struct
 #pragma pack(push, 1)
 typedef struct
 {
-    uint16_t uints[MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT];
     float    floats[MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT];
+    uint16_t uints[MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT];
 } holding_reg_params_t;
 #pragma pack(pop)
 typedef struct
 {
-    QueueHandle_t uints[MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT];
     QueueHandle_t floats[MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT];
+    QueueHandle_t uints[MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT];
 } holding_reg_params_mutexes_t;
 
 #pragma pack(push, 1)
