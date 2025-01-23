@@ -25,39 +25,39 @@
 
 typedef enum
 {
-    ACTUAL_TEMP_DEGC = 0,
-    MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT,
+    ACTUAL_TEMP_DEGC = 0,                     //< Input Registers Address 1 - Length 2
+    MODBUS_PARAMS_INPUT_REGISTER_FLOAT_COUNT, //< Do not use this value
 } ModbusParams_InReg_Float_t;
 typedef enum
 {
-    PELTIER_DRIVER_STATE = 0,
-    MODBUS_PARAMS_INPUT_REGISTER_UINT_COUNT,
+    PELTIER_DRIVER_STATE = 0,                // Input Registers Address 3 - Length 1
+    MODBUS_PARAMS_INPUT_REGISTER_UINT_COUNT, //< Do not use this value
 } ModbusParams_InReg_UInt_t;
 
 typedef enum
 {
-    REQUESTED_TEMP_DEGC = 0,
-    MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT,
+    REQUESTED_TEMP_DEGC = 0,                    // Holding Registers Address 1 - Length 2
+    MODBUS_PARAMS_HOLDING_REGISTER_FLOAT_COUNT, //< Do not use this value
 } ModbusParams_HoldReg_Float_t;
 typedef enum
 {
-    TEMP_SENSE_PERIOD_MS = 0,
-    MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT,
+    TEMP_SENSE_PERIOD_MS = 0,                  // Holding Registers Address 3 - Length 1
+    MODBUS_PARAMS_HOLDING_REGISTER_UINT_COUNT, //< Do not use this value
 } ModbusParams_HoldReg_UInt_t;
 
 typedef enum
 {
-    ENABLE_TEMP_CONTROL = 0,
-    ENABLE_PELTIER_OVERRIDE,
-    OVERRIDE_PELTIER_COOLING,
-    OVERRIDE_PELTIER_HEATING,
-    MODBUS_PARAMS_COIL_COUNT,
+    ENABLE_TEMP_CONTROL = 0,  // Coil Port 1 Bit 1 - Address 1
+    ENABLE_PELTIER_OVERRIDE,  // Coil Port 1 Bit 2 - Address 2
+    OVERRIDE_PELTIER_COOLING, // Coil Port 1 Bit 3 - Address 3
+    OVERRIDE_PELTIER_HEATING, // Coil Port 1 Bit 4 - Address 4
+    MODBUS_PARAMS_COIL_COUNT, //< Do not use this value
 } ModbusParams_Coil_t;
 
 typedef enum
 {
-    TEMP_CONTROL_ENABLED = 0,
-    MODBUS_PARAMS_DISCRETE_INPUT_COUNT,
+    TEMP_CONTROL_ENABLED = 0,           // Discrete Inpout Port 1 Bit 1 - Address 1
+    MODBUS_PARAMS_DISCRETE_INPUT_COUNT, //< Do not use this value
 } ModbusParams_DiscreteInput_t;
 
 #define MODBUS_PARAMS_COIL_PORTS_COUNT           ((uint8_t)(MODBUS_PARAMS_COIL_COUNT / 8) + 1)
